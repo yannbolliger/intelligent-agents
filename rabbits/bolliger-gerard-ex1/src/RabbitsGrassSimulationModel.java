@@ -1,4 +1,5 @@
 import uchicago.src.sim.engine.Schedule;
+import uchicago.src.sim.engine.SimInit;
 import uchicago.src.sim.engine.SimModelImpl;
 
 /**
@@ -27,11 +28,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     private int numberOfRabbits = DEFAULT_NUMBER_RABBITS;
     private int grassGrowth = DEFAULT_GROWTH_RATE;
     private int grassEnergy = DEFAULT_GRASS_ENERGY;
-
-	public static void main(String[] args) {
-		System.out.println("Rabbit skeleton");
-	}
-
 
     public void begin(){
 		buildModel();
@@ -72,7 +68,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         // TODO Auto-generated method stub
 
     }
-    
+
     public int getGridSize() {
         return gridSize;
     }
@@ -89,19 +85,19 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         this.birthThreshold = birthThreshold;
     }
 
-    public int getNumberOfRabbits() {
+    public int getNumber() {
         return numberOfRabbits;
     }
 
-    public void setNumberOfRabbits(int numberOfRabbits) {
+    public void setNumber(int numberOfRabbits) {
         this.numberOfRabbits = numberOfRabbits;
     }
 
-    public int getGrassGrowth() {
+    public int getGrassGrowthRate() {
         return grassGrowth;
     }
 
-    public void setGrassGrowth(int grassGrowth) {
+    public void setGrassGrowthRate(int grassGrowth) {
         this.grassGrowth = grassGrowth;
     }
 
@@ -111,5 +107,11 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 
     public void setGrassEnergy(int grassEnergy) {
         this.grassEnergy = grassEnergy;
+    }
+
+    public static void main(String[] args) {
+        SimInit init = new SimInit();
+        RabbitsGrassSimulationModel model = new RabbitsGrassSimulationModel();
+        init.loadModel(model, "", false);
     }
 }
