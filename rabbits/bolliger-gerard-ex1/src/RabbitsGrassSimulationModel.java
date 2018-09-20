@@ -13,34 +13,103 @@ import uchicago.src.sim.engine.SimModelImpl;
 
 public class RabbitsGrassSimulationModel extends SimModelImpl {		
 
-		public static void main(String[] args) {
-			
-			System.out.println("Rabbit skeleton");
-			
-		}
+    public static final int DEFAULT_GRID_SIZE = 20;
+    public static final int DEFAULT_NUMBER_RABBITS = 150;
+    public static final int DEFAULT_BIRTH_THRESHOLD = 15;
+    public static final int DEFAULT_GROWTH_RATE = 15;
+    public static final int DEFAULT_GRASS_ENERGY = 5;
 
-		public void begin() {
-			// TODO Auto-generated method stub
-			
-		}
+    public static final int STEP_COST = 1;
 
-		public String[] getInitParam() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+    private Schedule schedule;
+    private int gridSize = DEFAULT_GRID_SIZE;
+    private int birthThreshold = DEFAULT_BIRTH_THRESHOLD;
+    private int numberOfRabbits = DEFAULT_NUMBER_RABBITS;
+    private int grassGrowth = DEFAULT_GROWTH_RATE;
+    private int grassEnergy = DEFAULT_GRASS_ENERGY;
 
-		public String getName() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+	public static void main(String[] args) {
+		System.out.println("Rabbit skeleton");
+	}
 
-		public Schedule getSchedule() {
-			// TODO Auto-generated method stub
-			return null;
-		}
 
-		public void setup() {
-			// TODO Auto-generated method stub
-			
-		}
+    public void begin(){
+		buildModel();
+		buildSchedule();
+		buildDisplay();
+	}
+
+	public void buildModel(){
+	}
+
+	public void buildSchedule(){
+	}
+
+	public void buildDisplay(){
+	}
+
+    public String[] getInitParam() {
+        String[] params = {
+                "GridSize",
+                "BirthThreshold",
+                "GrassGrowthRate",
+                "Number",
+                "GrassEnergy"
+        };
+
+        return params;
+    }
+
+    public String getName() {
+        return "GerBol Rabbit Simulation";
+    }
+
+    public Schedule getSchedule() {
+        return schedule;
+    }
+
+    public void setup() {
+        // TODO Auto-generated method stub
+
+    }
+    
+    public int getGridSize() {
+        return gridSize;
+    }
+
+    public void setGridSize(int gridSize) {
+        this.gridSize = gridSize;
+    }
+
+    public int getBirthThreshold() {
+        return birthThreshold;
+    }
+
+    public void setBirthThreshold(int birthThreshold) {
+        this.birthThreshold = birthThreshold;
+    }
+
+    public int getNumberOfRabbits() {
+        return numberOfRabbits;
+    }
+
+    public void setNumberOfRabbits(int numberOfRabbits) {
+        this.numberOfRabbits = numberOfRabbits;
+    }
+
+    public int getGrassGrowth() {
+        return grassGrowth;
+    }
+
+    public void setGrassGrowth(int grassGrowth) {
+        this.grassGrowth = grassGrowth;
+    }
+
+    public int getGrassEnergy() {
+        return grassEnergy;
+    }
+
+    public void setGrassEnergy(int grassEnergy) {
+        this.grassEnergy = grassEnergy;
+    }
 }
