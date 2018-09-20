@@ -3,6 +3,7 @@ import uchicago.src.sim.engine.SimInit;
 import uchicago.src.sim.engine.SimModelImpl;
 import uchicago.src.sim.gui.ColorMap;
 import uchicago.src.sim.gui.DisplaySurface;
+import uchicago.src.sim.gui.Object2DDisplay;
 import uchicago.src.sim.gui.Value2DDisplay;
 
 import java.awt.*;
@@ -52,7 +53,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         this.space = new RabbitsGrassSimulationSpace(gridSize);
         space.growGrass(grassGrowth);
 
-        for(int i = 0; i < numAgents; i++){
+        for (int i = 0; i < numberOfRabbits; i++){
             addNewAgent();
         }
 	}
@@ -62,11 +63,17 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 
 	public void buildDisplay(){
         ColorMap map = new ColorMap();
-        map.mapColor(RabbitsGrassSimulationSpace.EMPTY, Color.lightGray);
+        map.mapColor(RabbitsGrassSimulationSpace.EMPTY, Color.gray);
         map.mapColor(RabbitsGrassSimulationSpace.GRASS, Color.green);
 
-        Value2DDisplay display = new Value2DDisplay(space.getSpace(), map);
-        displaySurface.addDisplayable(display, "Grass");
+        Value2DDisplay grassDisplay =
+                new Value2DDisplay(space.getGrassSpace(), map);
+        displaySurface.addDisplayable(grassDisplay, "Grass");
+
+        Object2DDisplay displayAgents =
+                new Object2DDisplay(space.getAgentSpace());
+        displayAgents.setObjectList(agentList);
+        displaySurface.addDisplayable(displayAgents, "Agents");
 	}
 
     public String[] getInitParam() {
@@ -150,5 +157,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     private void addNewAgent(){
         RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent();
         agentList.add(a);
+        space.addAgent(a);
     }
 }

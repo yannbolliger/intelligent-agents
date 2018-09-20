@@ -36,8 +36,11 @@ public class RabbitsGrassSimulationSpace {
         }
     }
 
-    public Object2DGrid getSpace() {
+    public Object2DGrid getGrassSpace() {
         return grassSpace;
+    }
+    public Object2DGrid getAgentSpace() {
+        return agentSpace;
     }
 
     public boolean isCellOccupied(int x, int y){

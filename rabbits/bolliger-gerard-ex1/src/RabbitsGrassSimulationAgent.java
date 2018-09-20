@@ -1,6 +1,8 @@
 import uchicago.src.sim.gui.Drawable;
 import uchicago.src.sim.gui.SimGraphics;
 
+import java.awt.*;
+
 
 /**
  * Class that implements the simulation agent for the rabbits grass simulation.
@@ -22,19 +24,16 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	}
 
 
-	public void draw(SimGraphics arg0) {
-		// TODO Auto-generated method stub
-		
+	public void draw(SimGraphics graphics) {
+		graphics.drawFastRect(Color.white);
 	}
 
 	public int getX() {
-		// TODO Auto-generated method stub
-		return 0;
+		return x;
 	}
 
 	public int getY() {
-		// TODO Auto-generated method stub
-		return 0;
+		return y;
 	}
 
 	public void setXY(int newX, int newY){
