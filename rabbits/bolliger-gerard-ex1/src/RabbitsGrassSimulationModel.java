@@ -6,6 +6,7 @@ import uchicago.src.sim.gui.DisplaySurface;
 import uchicago.src.sim.gui.Value2DDisplay;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * Class that implements the simulation model for the rabbits grass
@@ -30,12 +31,14 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     private Schedule schedule;
     private DisplaySurface displaySurface;
     private RabbitsGrassSimulationSpace space;
+    private ArrayList agentList;
 
     private int gridSize = DEFAULT_GRID_SIZE;
     private int birthThreshold = DEFAULT_BIRTH_THRESHOLD;
     private int numberOfRabbits = DEFAULT_NUMBER_RABBITS;
     private int grassGrowth = DEFAULT_GROWTH_RATE;
     private int grassEnergy = DEFAULT_GRASS_ENERGY;
+
 
     public void begin(){
 		buildModel();
@@ -48,6 +51,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	public void buildModel() {
         this.space = new RabbitsGrassSimulationSpace(gridSize);
         space.growGrass(grassGrowth);
+
+        for(int i = 0; i < numAgents; i++){
+            addNewAgent();
+        }
 	}
 
 	public void buildSchedule(){
@@ -90,6 +97,8 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         final String windowName = getName() + "Window";
         displaySurface = new DisplaySurface(this, windowName);
         registerDisplaySurface(windowName, displaySurface);
+
+        agentList = new ArrayList();
     }
 
     public int getGridSize() {
@@ -136,5 +145,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         SimInit init = new SimInit();
         RabbitsGrassSimulationModel model = new RabbitsGrassSimulationModel();
         init.loadModel(model, "", false);
+    }
+
+    private void addNewAgent(){
+        RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent();
+        agentList.add(a);
     }
 }
