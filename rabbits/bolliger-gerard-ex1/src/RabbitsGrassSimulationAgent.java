@@ -23,6 +23,9 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 		this.energy = DEFAULT_BIRTH_ENERGY;
 	}
 
+	public void step() {
+		energy--;
+	}
 
 	public void draw(SimGraphics graphics) {
 		graphics.drawFastRect(Color.white);

@@ -1,3 +1,4 @@
+import uchicago.src.sim.engine.BasicAction;
 import uchicago.src.sim.engine.Schedule;
 import uchicago.src.sim.engine.SimInit;
 import uchicago.src.sim.engine.SimModelImpl;
@@ -5,6 +6,7 @@ import uchicago.src.sim.gui.ColorMap;
 import uchicago.src.sim.gui.DisplaySurface;
 import uchicago.src.sim.gui.Object2DDisplay;
 import uchicago.src.sim.gui.Value2DDisplay;
+import uchicago.src.sim.util.SimUtilities;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     private Schedule schedule;
     private DisplaySurface displaySurface;
     private RabbitsGrassSimulationSpace space;
-    private ArrayList agentList;
+    private ArrayList<RabbitsGrassSimulationAgent> agentList;
 
     private int gridSize = DEFAULT_GRID_SIZE;
     private int birthThreshold = DEFAULT_BIRTH_THRESHOLD;
@@ -40,6 +42,20 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     private int grassGrowth = DEFAULT_GROWTH_RATE;
     private int grassEnergy = DEFAULT_GRASS_ENERGY;
 
+
+    public void setup() {
+        space = null;
+
+        if (displaySurface != null) displaySurface.dispose();
+
+        final String windowName = getName() + "Window";
+        displaySurface = new DisplaySurface(this, windowName);
+        registerDisplaySurface(windowName, displaySurface);
+
+        agentList = new ArrayList();
+
+        schedule = new Schedule(1);
+    }
 
     public void begin(){
 		buildModel();
@@ -59,6 +75,15 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	}
 
 	public void buildSchedule(){
+
+        schedule.scheduleActionBeginning(0, new BasicAction() {
+
+            @Override
+            public void execute() {
+                SimUtilities.shuffle(agentList);
+                for (RabbitsGrassSimulationAgent agent: agentList) agent.step();
+            }
+        });
 	}
 
 	public void buildDisplay(){
@@ -94,18 +119,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 
     public Schedule getSchedule() {
         return schedule;
-    }
-
-    public void setup() {
-        this.space = null;
-
-        if (displaySurface != null) displaySurface.dispose();
-
-        final String windowName = getName() + "Window";
-        displaySurface = new DisplaySurface(this, windowName);
-        registerDisplaySurface(windowName, displaySurface);
-
-        agentList = new ArrayList();
     }
 
     public int getGridSize() {
