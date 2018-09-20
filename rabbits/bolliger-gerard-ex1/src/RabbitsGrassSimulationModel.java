@@ -1,6 +1,11 @@
 import uchicago.src.sim.engine.Schedule;
 import uchicago.src.sim.engine.SimInit;
 import uchicago.src.sim.engine.SimModelImpl;
+import uchicago.src.sim.gui.ColorMap;
+import uchicago.src.sim.gui.DisplaySurface;
+import uchicago.src.sim.gui.Value2DDisplay;
+
+import java.awt.*;
 
 /**
  * Class that implements the simulation model for the rabbits grass
@@ -23,6 +28,9 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     public static final int STEP_COST = 1;
 
     private Schedule schedule;
+    private DisplaySurface displaySurface;
+    private RabbitsGrassSimulationSpace space;
+
     private int gridSize = DEFAULT_GRID_SIZE;
     private int birthThreshold = DEFAULT_BIRTH_THRESHOLD;
     private int numberOfRabbits = DEFAULT_NUMBER_RABBITS;
@@ -33,15 +41,25 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		buildModel();
 		buildSchedule();
 		buildDisplay();
+
+		displaySurface.display();
 	}
 
-	public void buildModel(){
+	public void buildModel() {
+        this.space = new RabbitsGrassSimulationSpace(gridSize);
+        space.growGrass(grassGrowth);
 	}
 
 	public void buildSchedule(){
 	}
 
 	public void buildDisplay(){
+        ColorMap map = new ColorMap();
+        map.mapColor(RabbitsGrassSimulationSpace.EMPTY, Color.lightGray);
+        map.mapColor(RabbitsGrassSimulationSpace.GRASS, Color.green);
+
+        Value2DDisplay display = new Value2DDisplay(space.getSpace(), map);
+        displaySurface.addDisplayable(display, "Grass");
 	}
 
     public String[] getInitParam() {
@@ -65,8 +83,13 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     }
 
     public void setup() {
-        // TODO Auto-generated method stub
+        this.space = null;
 
+        if (displaySurface != null) displaySurface.dispose();
+
+        final String windowName = getName() + "Window";
+        displaySurface = new DisplaySurface(this, windowName);
+        registerDisplaySurface(windowName, displaySurface);
     }
 
     public int getGridSize() {
