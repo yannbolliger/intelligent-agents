@@ -66,7 +66,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	}
 
 	public void buildModel() {
-        this.space = new RabbitsGrassSimulationSpace(gridSize);
+        this.space = new RabbitsGrassSimulationSpace(gridSize, getGrassEnergy());
         space.growGrass(grassGrowth);
 
         for (int i = 0; i < numberOfRabbits; i++){
@@ -82,6 +82,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
             public void execute() {
                 SimUtilities.shuffle(agentList);
                 for (RabbitsGrassSimulationAgent agent: agentList) agent.step();
+
+                space.growGrass(getGrassGrowthRate());
+
+                displaySurface.updateDisplay();
             }
         });
 	}
@@ -168,7 +172,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     }
 
     private void addNewAgent(){
-        RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent();
+        RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent(space);
         agentList.add(a);
         space.addAgent(a);
     }

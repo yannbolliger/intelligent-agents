@@ -13,8 +13,11 @@ public class RabbitsGrassSimulationSpace {
     private Object2DGrid grassSpace;
     private Object2DGrid agentSpace;
 
-    public RabbitsGrassSimulationSpace(int gridSize) {
+    private  int grassEnergy;
+
+    public RabbitsGrassSimulationSpace(int gridSize, int grassEnergy) {
         this.grassSpace = new Object2DGrid(gridSize, gridSize);
+        this.grassEnergy = grassEnergy;
         agentSpace = new Object2DGrid(gridSize, gridSize);
 
         for (int i = 0; i < gridSize; i++) {
@@ -36,6 +39,14 @@ public class RabbitsGrassSimulationSpace {
         }
     }
 
+    public int getGrassEnergyAt(int x, int y){
+        if (((Integer) grassSpace.getObjectAt(x,y)).intValue() == GRASS){
+            this.grassSpace.putObjectAt(x, y, EMPTY);
+            return grassEnergy;
+        }
+        return 0;
+    }
+
     public Object2DGrid getGrassSpace() {
         return grassSpace;
     }
@@ -45,6 +56,10 @@ public class RabbitsGrassSimulationSpace {
 
     public boolean isCellOccupied(int x, int y){
         return (agentSpace.getObjectAt(x, y)!=null);
+    }
+
+    public void removeAgentAt(int x, int y){
+        agentSpace.putObjectAt(x, y, null);
     }
 
     public boolean addAgent(RabbitsGrassSimulationAgent agent){
@@ -65,4 +80,25 @@ public class RabbitsGrassSimulationSpace {
 
         return retVal;
     }
+
+    public boolean moveAgentAt(int x, int y, int newX, int newY){
+
+        newX = Math.floorMod(newX, agentSpace.getSizeX());
+        newY = Math.floorMod(newY, agentSpace.getSizeY());
+
+        if (newX < 0 || newY < 0){
+            System.out.print(newX + ' ' + newY);
+        }
+
+        if(!isCellOccupied(newX, newY)){
+            RabbitsGrassSimulationAgent agent = (RabbitsGrassSimulationAgent)agentSpace.getObjectAt(x, y);
+            removeAgentAt(x,y);
+            agent.setXY(newX, newY);
+            agentSpace.putObjectAt(newX, newY, agent);
+            return true;
+        }
+        return false;
+    }
+
+
 }
