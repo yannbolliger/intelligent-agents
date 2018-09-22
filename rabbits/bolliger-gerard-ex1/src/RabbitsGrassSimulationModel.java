@@ -10,6 +10,7 @@ import uchicago.src.sim.util.SimUtilities;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Class that implements the simulation model for the rabbits grass
@@ -24,11 +25,10 @@ import java.util.ArrayList;
 public class RabbitsGrassSimulationModel extends SimModelImpl {		
 
     public static final int DEFAULT_GRID_SIZE = 20;
-    public static final int DEFAULT_NUMBER_RABBITS = 150;
+    public static final int DEFAULT_NUMBER_RABBITS = 100;
     public static final int DEFAULT_BIRTH_THRESHOLD = 15;
     public static final int DEFAULT_GROWTH_RATE = 15;
     public static final int DEFAULT_GRASS_ENERGY = 5;
-
     public static final int STEP_COST = 1;
 
     private Schedule schedule;
@@ -72,12 +72,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         for (int i = 0; i < numberOfRabbits; i++) addNewAgent();
 	}
 
-    private void addNewAgent(){
-        RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent(space);
-        agentList.add(a);
-        space.addAgent(a);
-    }
-
 	public void buildSchedule(){
 
         schedule.scheduleActionBeginning(0, new BasicAction() {
@@ -86,23 +80,33 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
             public void execute() {
 
                 SimUtilities.shuffle(agentList);
-                ArrayList<RabbitsGrassSimulationAgent> newAgentList =
-                        new ArrayList();
+                Iterator<RabbitsGrassSimulationAgent> iterator = agentList.iterator();
 
-                for (RabbitsGrassSimulationAgent agent: agentList) {
+                int toBeBornAgents = 0;
+                while (iterator.hasNext()) {
+                    RabbitsGrassSimulationAgent agent = iterator.next();
                     agent.step();
-                    // only keep alive agents
-                    if (agent.isAlive()) newAgentList.add(agent);
-                }
 
-                // can't reassign agentList because display still has a
-                // reference
-                agentList.clear();
-                agentList.addAll(newAgentList);
+                    if (!agent.isAlive()) {
+                        iterator.remove();
+                        space.removeAgentAt(agent.getX(), agent.getY());
+                    }
+                    else if (agent.canReproduce()) {
+                        toBeBornAgents++;
+                    }
+                }
+                for (int i = 0; i < toBeBornAgents; i++) addNewAgent();
 
                 space.growGrass(getGrassGrowthRate());
 
                 displaySurface.updateDisplay();
+            }
+        });
+
+        schedule.scheduleActionAtInterval(10, new BasicAction() {
+            @Override
+            public void execute() {
+                System.out.println("Alive rabbits: " + countLivingAgents());
             }
         });
 	}
@@ -114,13 +118,25 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 
         Value2DDisplay grassDisplay =
                 new Value2DDisplay(space.getGrassSpace(), map);
-        displaySurface.addDisplayable(grassDisplay, "Grass");
+        displaySurface.addDisplayableProbeable(grassDisplay, "Grass");
 
         Object2DDisplay displayAgents =
                 new Object2DDisplay(space.getAgentSpace());
         displayAgents.setObjectList(agentList);
-        displaySurface.addDisplayable(displayAgents, "Agents");
+        displaySurface.addDisplayableProbeable(displayAgents, "Agents");
 	}
+
+    private void addNewAgent(){
+        RabbitsGrassSimulationAgent a =
+                new RabbitsGrassSimulationAgent(space, birthThreshold);
+
+        // add agent to the list only if it could be placed on the space
+        if (space.addAgent(a)) agentList.add(a);
+    }
+
+    private int countLivingAgents(){
+        return (int) agentList.stream().filter(a -> a.isAlive()).count();
+    }
 
     public String[] getInitParam() {
         String[] params = {

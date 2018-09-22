@@ -13,7 +13,7 @@ public class RabbitsGrassSimulationSpace {
     private Object2DGrid grassSpace;
     private Object2DGrid agentSpace;
 
-    private  int grassEnergy;
+    private int grassEnergy;
 
     public RabbitsGrassSimulationSpace(int gridSize, int grassEnergy) {
         this.grassSpace = new Object2DGrid(gridSize, gridSize);
@@ -39,7 +39,7 @@ public class RabbitsGrassSimulationSpace {
         }
     }
 
-    public int getGrassEnergyAt(int x, int y){
+    public int takeGrassEnergyAt(int x, int y){
         if ((int) grassSpace.getObjectAt(x,y) == GRASS) {
             this.grassSpace.putObjectAt(x, y, EMPTY);
             return grassEnergy;

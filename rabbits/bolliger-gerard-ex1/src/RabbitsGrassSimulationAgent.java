@@ -18,29 +18,32 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	private int x;
 	private int y;
 	private int energy;
-	private RabbitsGrassSimulationSpace space;
+	private final RabbitsGrassSimulationSpace space;
+	private int birthThreshold;
 
-	public static final int DEFAULT_BIRTH_ENERGY = 15;
+	public static final int DEFAULT_BIRTH_ENERGY = 5;
 
-	public enum LegalMoves {
-        UP, DOWN, RIGHT, LEFT
-    }
+	public enum LegalMoves { UP, DOWN, RIGHT, LEFT }
 
     public static final List<LegalMoves> MOVES_LIST =
             Arrays.asList(LegalMoves.values());
 
-    public RabbitsGrassSimulationAgent(RabbitsGrassSimulationSpace space){
+    public RabbitsGrassSimulationAgent(
+            RabbitsGrassSimulationSpace space,
+            int birthThreshold){
 		this.x = -1;
 		this.y = -1;
 		this.energy = DEFAULT_BIRTH_ENERGY;
 		this.space = space;
+		setBirthThreshold(birthThreshold);
 	}
 
 	public void step() {
         moveRandomly();
         decreaseEnergy();
         takeGrass();
-        eventuallyDie();
+
+        // dying and reproducing is done by the model
 	}
 
 	public void draw(SimGraphics graphics) {
@@ -59,13 +62,21 @@ public class RabbitsGrassSimulationAgent implements Drawable {
         return energy > 0;
 	}
 
+	public boolean canReproduce() {
+        return energy > birthThreshold;
+    }
+
 	public void setXY(int newX, int newY){
 		x = newX;
 		y = newY;
 	}
 
+	public void setBirthThreshold(int birthThreshold) {
+        this.birthThreshold = birthThreshold;
+    }
+
 	private void decreaseEnergy(){
-        energy--;
+        energy -= RabbitsGrassSimulationModel.STEP_COST;
     }
 
     private void moveRandomly(){
@@ -95,11 +106,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
         // TODO what happens if not able to move?
     }
 
-    private void takeGrass(){
-	    energy += space.getGrassEnergyAt(getX(),getY());
-    }
-
-    private void eventuallyDie() {
-        if (!isAlive()) space.removeAgentAt(getX(), getY());
+    private void takeGrass() {
+	    energy += space.takeGrassEnergyAt(getX(),getY());
     }
 }
