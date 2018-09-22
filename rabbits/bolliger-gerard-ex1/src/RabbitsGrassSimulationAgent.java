@@ -1,11 +1,11 @@
 import uchicago.src.sim.gui.Drawable;
 import uchicago.src.sim.gui.SimGraphics;
 
-import java.awt.*;
-import java.util.ArrayList;
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -19,7 +19,6 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	private int y;
 	private int energy;
 	private RabbitsGrassSimulationSpace space;
-    private ArrayList<LegalMoves> moves;
 
 	public static final int DEFAULT_BIRTH_ENERGY = 15;
 
@@ -27,22 +26,25 @@ public class RabbitsGrassSimulationAgent implements Drawable {
         UP, DOWN, RIGHT, LEFT
     }
 
+    public static final List<LegalMoves> MOVES_LIST =
+            Arrays.asList(LegalMoves.values());
+
     public RabbitsGrassSimulationAgent(RabbitsGrassSimulationSpace space){
 		this.x = -1;
 		this.y = -1;
 		this.energy = DEFAULT_BIRTH_ENERGY;
 		this.space = space;
-        this.moves = new ArrayList<LegalMoves>(Arrays.asList(LegalMoves.values()));
 	}
 
 	public void step() {
         moveRandomly();
         decreaseEnergy();
         takeGrass();
+        eventuallyDie();
 	}
 
 	public void draw(SimGraphics graphics) {
-		graphics.drawFastRect(Color.white);
+	    graphics.drawFastCircle(Color.white);
 	}
 
 	public int getX() {
@@ -51,6 +53,10 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 
 	public int getY() {
 		return y;
+	}
+
+	public boolean isAlive() {
+        return energy > 0;
 	}
 
 	public void setXY(int newX, int newY){
@@ -64,12 +70,12 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 
     private void moveRandomly(){
 
-        Collections.shuffle(moves);
+        Collections.shuffle(MOVES_LIST);
 
         boolean agentHasMoved = false;
-        Iterator<LegalMoves> moveIterator = moves.iterator();
+        Iterator<LegalMoves> moveIterator = MOVES_LIST.iterator();
 
-        while(moveIterator.hasNext() && !agentHasMoved){
+        while (moveIterator.hasNext() && !agentHasMoved){
             switch (moveIterator.next()){
                 case UP:
                     agentHasMoved = space.moveAgentAt(getX(), getY(), getX(), getY() + 1);
@@ -93,4 +99,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	    energy += space.getGrassEnergyAt(getX(),getY());
     }
 
+    private void eventuallyDie() {
+        if (!isAlive()) space.removeAgentAt(getX(), getY());
+    }
 }

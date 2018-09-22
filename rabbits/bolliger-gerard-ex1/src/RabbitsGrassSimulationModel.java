@@ -48,7 +48,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 
         if (displaySurface != null) displaySurface.dispose();
 
-        final String windowName = getName() + "Window";
+        final String windowName = getName() + " Window";
         displaySurface = new DisplaySurface(this, windowName);
         registerDisplaySurface(windowName, displaySurface);
 
@@ -69,10 +69,14 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         this.space = new RabbitsGrassSimulationSpace(gridSize, getGrassEnergy());
         space.growGrass(grassGrowth);
 
-        for (int i = 0; i < numberOfRabbits; i++){
-            addNewAgent();
-        }
+        for (int i = 0; i < numberOfRabbits; i++) addNewAgent();
 	}
+
+    private void addNewAgent(){
+        RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent(space);
+        agentList.add(a);
+        space.addAgent(a);
+    }
 
 	public void buildSchedule(){
 
@@ -80,8 +84,21 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 
             @Override
             public void execute() {
+
                 SimUtilities.shuffle(agentList);
-                for (RabbitsGrassSimulationAgent agent: agentList) agent.step();
+                ArrayList<RabbitsGrassSimulationAgent> newAgentList =
+                        new ArrayList();
+
+                for (RabbitsGrassSimulationAgent agent: agentList) {
+                    agent.step();
+                    // only keep alive agents
+                    if (agent.isAlive()) newAgentList.add(agent);
+                }
+
+                // can't reassign agentList because display still has a
+                // reference
+                agentList.clear();
+                agentList.addAll(newAgentList);
 
                 space.growGrass(getGrassGrowthRate());
 
@@ -169,11 +186,5 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         SimInit init = new SimInit();
         RabbitsGrassSimulationModel model = new RabbitsGrassSimulationModel();
         init.loadModel(model, "", false);
-    }
-
-    private void addNewAgent(){
-        RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent(space);
-        agentList.add(a);
-        space.addAgent(a);
     }
 }
