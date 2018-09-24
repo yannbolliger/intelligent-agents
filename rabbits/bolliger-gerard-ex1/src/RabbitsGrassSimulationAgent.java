@@ -1,7 +1,10 @@
 import uchicago.src.sim.gui.Drawable;
 import uchicago.src.sim.gui.SimGraphics;
 
-import java.awt.Color;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -20,6 +23,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	private int energy;
 	private final RabbitsGrassSimulationSpace space;
 	private int birthThreshold;
+	private Image rabbitImage;
 
 	public static final int DEFAULT_BIRTH_ENERGY = 5;
 
@@ -36,7 +40,15 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 		this.energy = energyAtBirth;
 		this.space = space;
 		setBirthThreshold(birthThreshold);
-	}
+
+        try {
+            File rabbitImageFile = new File("bolliger-gerard-ex1/images/rabbit.png");
+            System.out.print(rabbitImageFile.getAbsolutePath());
+            this.rabbitImage = ImageIO.read(rabbitImageFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 	public void step() {
         moveRandomly();
@@ -52,7 +64,12 @@ public class RabbitsGrassSimulationAgent implements Drawable {
     }
 
 	public void draw(SimGraphics graphics) {
-	    graphics.drawFastCircle(Color.white);
+        if (rabbitImage == null){
+            graphics.drawFastCircle(Color.WHITE);
+        }
+        else {
+            graphics.drawImageToFit(rabbitImage);
+        }
 	}
 
 	public int getX() {
