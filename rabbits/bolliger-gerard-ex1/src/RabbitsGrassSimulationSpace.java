@@ -28,10 +28,7 @@ public class RabbitsGrassSimulationSpace {
     }
 
     public void growGrass(int growthRate) {
-        final int surface = grassSpace.getSizeX() * grassSpace.getSizeY();
-        final int grassAmount = surface * growthRate/1000;
-
-        for (int i = 0; i < grassAmount; i++) {
+        for (int i = 0; i < growthRate; i++) {
             int x = (int) (Math.random() * grassSpace.getSizeX());
             int y = (int) (Math.random() * grassSpace.getSizeY());
 

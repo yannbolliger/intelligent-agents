@@ -32,7 +32,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     public static final int DEFAULT_NUMBER_RABBITS = 100;
     public static final int DEFAULT_BIRTH_THRESHOLD = 15;
     public static final int DEFAULT_BIRTH_ENERGY = 5;
-    public static final int DEFAULT_GROWTH_RATE = 15;
+    public static final int DEFAULT_GROWTH_RATE  = 5;
     public static final int DEFAULT_GRASS_ENERGY = 5;
 
     private Schedule schedule;
