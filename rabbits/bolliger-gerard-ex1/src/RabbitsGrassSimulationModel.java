@@ -13,7 +13,9 @@ import uchicago.src.sim.util.SimUtilities;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Class that implements the simulation model for the rabbits grass
@@ -78,7 +80,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         this.space = new RabbitsGrassSimulationSpace(gridSize, getGrassEnergy());
         space.growGrass(grassGrowth);
 
-        for (int i = 0; i < numberOfRabbits; i++) addNewAgent();
+        for (int i = 0; i < numberOfRabbits; i++) addNewAgent(RabbitsGrassSimulationAgent.DEFAULT_BIRTH_ENERGY);
 	}
 
 	public void buildSchedule(){
@@ -91,7 +93,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
                 SimUtilities.shuffle(agentList);
                 Iterator<RabbitsGrassSimulationAgent> iterator = agentList.iterator();
 
-                int toBeBornAgents = 0;
+                List<Integer> newAgentEnergies = new ArrayList<Integer>();
                 while (iterator.hasNext()) {
                     RabbitsGrassSimulationAgent agent = iterator.next();
                     agent.step();
@@ -101,10 +103,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
                         space.removeAgentAt(agent.getX(), agent.getY());
                     }
                     else if (agent.canReproduce()) {
-                        toBeBornAgents++;
+                        newAgentEnergies.add(agent.reproduce());
                     }
                 }
-                for (int i = 0; i < toBeBornAgents; i++) addNewAgent();
+                for (int i : newAgentEnergies) addNewAgent(i);
 
                 space.growGrass(getGrassGrowthRate());
 
@@ -138,9 +140,9 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         populationInSpace.addSequence("rabbit population in space", new RabbitPopulation());
 	}
 
-    private void addNewAgent(){
+    private void addNewAgent(int energyAtBirth){
         RabbitsGrassSimulationAgent a =
-                new RabbitsGrassSimulationAgent(space, birthThreshold);
+                new RabbitsGrassSimulationAgent(space, birthThreshold, energyAtBirth);
 
         // add agent to the list only if it could be placed on the space
         if (space.addAgent(a)) agentList.add(a);

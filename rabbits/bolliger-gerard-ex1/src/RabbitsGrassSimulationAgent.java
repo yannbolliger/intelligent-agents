@@ -30,10 +30,10 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 
     public RabbitsGrassSimulationAgent(
             RabbitsGrassSimulationSpace space,
-            int birthThreshold){
+            int birthThreshold, int energyAtBirth){
 		this.x = -1;
 		this.y = -1;
-		this.energy = DEFAULT_BIRTH_ENERGY;
+		this.energy = energyAtBirth;
 		this.space = space;
 		setBirthThreshold(birthThreshold);
 	}
@@ -45,6 +45,11 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 
         // dying and reproducing is done by the model
 	}
+
+	public int reproduce(){
+        this.energy = this.energy / 2;
+        return this.energy;
+    }
 
 	public void draw(SimGraphics graphics) {
 	    graphics.drawFastCircle(Color.white);
