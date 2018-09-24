@@ -18,6 +18,14 @@ import java.util.List;
  */
 
 public class RabbitsGrassSimulationAgent implements Drawable {
+    public static final int DEFAULT_BIRTH_ENERGY = 5;
+    public static final int STEP_COST = 1;
+
+    public enum LegalMoves { UP, DOWN, RIGHT, LEFT }
+
+    public static final List<LegalMoves> MOVES_LIST =
+            Arrays.asList(LegalMoves.values());
+
 	private int x;
 	private int y;
 	private int energy;
@@ -25,12 +33,6 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	private int birthThreshold;
 	private Image rabbitImage;
 
-	public static final int DEFAULT_BIRTH_ENERGY = 5;
-
-	public enum LegalMoves { UP, DOWN, RIGHT, LEFT }
-
-    public static final List<LegalMoves> MOVES_LIST =
-            Arrays.asList(LegalMoves.values());
 
     public RabbitsGrassSimulationAgent(
             RabbitsGrassSimulationSpace space,
@@ -98,7 +100,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
     }
 
 	private void decreaseEnergy(){
-        energy -= RabbitsGrassSimulationModel.STEP_COST;
+        energy -= STEP_COST;
     }
 
     private void moveRandomly(){
@@ -124,7 +126,6 @@ public class RabbitsGrassSimulationAgent implements Drawable {
                     break;
             }
         }
-
         // TODO what happens if not able to move?
     }
 
