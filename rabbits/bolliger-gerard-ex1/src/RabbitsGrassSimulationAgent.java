@@ -44,7 +44,6 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 
         try {
             File rabbitImageFile = new File("bolliger-gerard-ex1/images/rabbit.png");
-            System.out.print(rabbitImageFile.getAbsolutePath());
             this.rabbitImage = ImageIO.read(rabbitImageFile);
         } catch (IOException e) {
             e.printStackTrace();
