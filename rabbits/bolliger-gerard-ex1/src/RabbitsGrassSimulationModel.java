@@ -131,6 +131,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         displaySurface.addDisplayableProbeable(displayAgents, "Agents");
 
         populationGraph.addSequence("Rabbit population", new RabbitPopulation());
+        populationGraph.addSequence("Grass amount", new GrassPopulation());
 	}
 
     private void addNewAgent(int energyAtBirth){
@@ -139,10 +140,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 
         // add agent to the list only if it could be placed on the space
         if (space.addAgent(a)) agentList.add(a);
-    }
-
-    private int countLivingAgents(){
-        return (int) agentList.stream().filter(a -> a.isAlive()).count();
     }
 
     private void setupDisplaySurface() {
@@ -226,14 +223,19 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         init.loadModel(model, "", false);
     }
 
-    private class RabbitPopulation implements DataSource, Sequence {
+    private class RabbitPopulation extends Population {
 
-        public Object execute(){
-            return new Double(getSValue());
-        }
-
+        @Override
         public double getSValue(){
-            return countLivingAgents();
+            return agentList.stream().filter(a -> a.isAlive()).count();
+        }
+    }
+
+    private class GrassPopulation extends Population {
+
+        @Override
+        public double getSValue() {
+            return space.countGrass();
         }
     }
 }

@@ -53,6 +53,17 @@ public class RabbitsGrassSimulationSpace {
     }
     public Object2DGrid getAgentSpace() { return agentSpace; }
 
+    public int countGrass() {
+        int grassCount = 0;
+
+        for (int i = 0; i < grassSpace.getSizeX(); i++) {
+            for (int j = 0; j < grassSpace.getSizeY(); j++) {
+                grassCount += (int) grassSpace.getObjectAt(i, j);
+            }
+        }
+        return grassCount;
+    }
+
     public boolean isCellOccupied(int x, int y){
         return agentSpace.getObjectAt(x, y) != null;
     }
