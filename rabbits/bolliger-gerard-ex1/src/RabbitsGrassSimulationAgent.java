@@ -18,7 +18,6 @@ import java.util.List;
  */
 
 public class RabbitsGrassSimulationAgent implements Drawable {
-    public static final int DEFAULT_BIRTH_ENERGY = 5;
     public static final int STEP_COST = 1;
 
     public enum LegalMoves { UP, DOWN, RIGHT, LEFT }

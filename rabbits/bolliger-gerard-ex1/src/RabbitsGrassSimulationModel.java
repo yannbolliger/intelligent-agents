@@ -13,7 +13,6 @@ import uchicago.src.sim.util.SimUtilities;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,7 +22,7 @@ import java.util.List;
  * order to run Repast simulation. It manages the entire RePast
  * environment and the simulation.
  *
- * @author 
+ * @author Kyle Gerard, Yann Bolliger
  */
 
 
@@ -32,6 +31,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     public static final int DEFAULT_GRID_SIZE = 20;
     public static final int DEFAULT_NUMBER_RABBITS = 100;
     public static final int DEFAULT_BIRTH_THRESHOLD = 15;
+    public static final int DEFAULT_BIRTH_ENERGY = 5;
     public static final int DEFAULT_GROWTH_RATE = 15;
     public static final int DEFAULT_GRASS_ENERGY = 5;
 
@@ -39,7 +39,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     private DisplaySurface displaySurface;
     private RabbitsGrassSimulationSpace space;
     private ArrayList<RabbitsGrassSimulationAgent> agentList;
-    private OpenSequenceGraph populationInSpace;
+    private OpenSequenceGraph populationGraph;
 
     private int gridSize = DEFAULT_GRID_SIZE;
     private int birthThreshold = DEFAULT_BIRTH_THRESHOLD;
@@ -51,19 +51,11 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     public void setup() {
         space = null;
 
-        if (displaySurface != null) displaySurface.dispose();
-
-        final String windowName = getName() + " Window";
-        displaySurface = new DisplaySurface(this, windowName);
-        registerDisplaySurface(windowName, displaySurface);
+        setupDisplaySurface();
+        setupPopulationGraph();
 
         agentList = new ArrayList();
-
         schedule = new Schedule(1);
-
-        if (populationInSpace != null) populationInSpace.dispose();
-        populationInSpace = new OpenSequenceGraph("Rabbit Population Count", this);
-        this.registerMediaProducer("Plot", populationInSpace);
     }
 
     public void begin(){
@@ -72,14 +64,16 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		buildDisplay();
 
 		displaySurface.display();
-        populationInSpace.display();
+        populationGraph.display();
 	}
 
 	public void buildModel() {
-        this.space = new RabbitsGrassSimulationSpace(gridSize, getGrassEnergy());
+        space = new RabbitsGrassSimulationSpace(gridSize, getGrassEnergy());
         space.growGrass(grassGrowth);
 
-        for (int i = 0; i < numberOfRabbits; i++) addNewAgent(RabbitsGrassSimulationAgent.DEFAULT_BIRTH_ENERGY);
+        for (int i = 0; i < numberOfRabbits; i++) {
+            addNewAgent(DEFAULT_BIRTH_ENERGY);
+        }
 	}
 
 	public void buildSchedule(){
@@ -92,7 +86,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
                 SimUtilities.shuffle(agentList);
                 Iterator<RabbitsGrassSimulationAgent> iterator = agentList.iterator();
 
-                List<Integer> newAgentEnergies = new ArrayList<Integer>();
+                List<Integer> newAgentEnergies = new ArrayList();
                 while (iterator.hasNext()) {
                     RabbitsGrassSimulationAgent agent = iterator.next();
                     agent.step();
@@ -113,10 +107,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
             }
         });
 
-        schedule.scheduleActionAtInterval(10, new BasicAction() {
+        schedule.scheduleActionAtInterval(5, new BasicAction() {
             @Override
             public void execute() {
-                populationInSpace.step();
+                populationGraph.step();
             }
         });
 
@@ -136,7 +130,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         displayAgents.setObjectList(agentList);
         displaySurface.addDisplayableProbeable(displayAgents, "Agents");
 
-        populationInSpace.addSequence("rabbit population in space", new RabbitPopulation());
+        populationGraph.addSequence("Rabbit population", new RabbitPopulation());
 	}
 
     private void addNewAgent(int energyAtBirth){
@@ -149,6 +143,21 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 
     private int countLivingAgents(){
         return (int) agentList.stream().filter(a -> a.isAlive()).count();
+    }
+
+    private void setupDisplaySurface() {
+        if (displaySurface != null) displaySurface.dispose();
+
+        final String windowName = getName() + " Window";
+        displaySurface = new DisplaySurface(this, windowName);
+        registerDisplaySurface(windowName, displaySurface);
+    }
+
+    private void setupPopulationGraph() {
+        if (populationGraph != null) populationGraph.dispose();
+
+        populationGraph = new OpenSequenceGraph("Rabbit Population Count", this);
+        this.registerMediaProducer("Plot", populationGraph);
     }
 
     public String[] getInitParam() {
@@ -217,7 +226,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         init.loadModel(model, "", false);
     }
 
-    class RabbitPopulation implements DataSource, Sequence {
+    private class RabbitPopulation implements DataSource, Sequence {
 
         public Object execute(){
             return new Double(getSValue());
@@ -226,6 +235,5 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         public double getSValue(){
             return countLivingAgents();
         }
-
     }
 }
