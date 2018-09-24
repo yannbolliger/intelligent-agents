@@ -1,3 +1,6 @@
+import uchicago.src.sim.analysis.DataSource;
+import uchicago.src.sim.analysis.OpenSequenceGraph;
+import uchicago.src.sim.analysis.Sequence;
 import uchicago.src.sim.engine.BasicAction;
 import uchicago.src.sim.engine.Schedule;
 import uchicago.src.sim.engine.SimInit;
@@ -35,6 +38,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     private DisplaySurface displaySurface;
     private RabbitsGrassSimulationSpace space;
     private ArrayList<RabbitsGrassSimulationAgent> agentList;
+    private OpenSequenceGraph populationInSpace;
 
     private int gridSize = DEFAULT_GRID_SIZE;
     private int birthThreshold = DEFAULT_BIRTH_THRESHOLD;
@@ -55,6 +59,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         agentList = new ArrayList();
 
         schedule = new Schedule(1);
+
+        if (populationInSpace != null) populationInSpace.dispose();
+        populationInSpace = new OpenSequenceGraph("Rabbit Population Count", this);
+        this.registerMediaProducer("Plot", populationInSpace);
     }
 
     public void begin(){
@@ -63,6 +71,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		buildDisplay();
 
 		displaySurface.display();
+        populationInSpace.display();
 	}
 
 	public void buildModel() {
@@ -106,9 +115,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         schedule.scheduleActionAtInterval(10, new BasicAction() {
             @Override
             public void execute() {
-                System.out.println("Alive rabbits: " + countLivingAgents());
+                populationInSpace.step();
             }
         });
+
 	}
 
 	public void buildDisplay(){
@@ -124,6 +134,8 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
                 new Object2DDisplay(space.getAgentSpace());
         displayAgents.setObjectList(agentList);
         displaySurface.addDisplayableProbeable(displayAgents, "Agents");
+
+        populationInSpace.addSequence("rabbit population in space", new RabbitPopulation());
 	}
 
     private void addNewAgent(){
@@ -202,5 +214,17 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
         SimInit init = new SimInit();
         RabbitsGrassSimulationModel model = new RabbitsGrassSimulationModel();
         init.loadModel(model, "", false);
+    }
+
+    class RabbitPopulation implements DataSource, Sequence {
+
+        public Object execute(){
+            return new Double(getSValue());
+        }
+
+        public double getSValue(){
+            return countLivingAgents();
+        }
+
     }
 }
