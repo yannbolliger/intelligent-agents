@@ -9,7 +9,7 @@
 
 % Put your group number and names in the author field %
 \title{\bf Excercise 1.\\ Implementing a first Application in RePast: A Rabbits Grass Simulation.}
-\author{Group \textnumero: Kyle Gérard, Yann Bolliger}
+\author{Group \textnumero: 90  Kyle Gérard, Yann Bolliger}
 
 \begin{document}
 \maketitle
@@ -17,8 +17,16 @@
 \section{Implementation}
 
 \subsection{Assumptions}
-% Describe the assumptions of your world model and implementation
-(e.g. is the grass amount bounded in each cell) %
+In our model the grass growth is bounded above linearly. 
+That means that in each tick of the simulation there are \textit{at most} \texttt{grassGrowthRate} 
+new squares of grass. For each of them we choose one square at random and put grass there even 
+if it was already present. The energy of the grass in a cell is always equal to 
+\texttt{grassEnergy}. This can be adjusted as a parameter.
+ 
+ - rabbits can be born on grass
+ - if rabbits can't move, they don't move but they still loose energy (1)
+ - rabbits can go back and forth
+ - default birth energy 30
 
 \subsection{Implementation Remarks}
 % Provide important details about your implementation, such as handling
