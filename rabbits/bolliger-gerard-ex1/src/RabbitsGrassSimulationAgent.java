@@ -43,10 +43,11 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 		setBirthThreshold(birthThreshold);
 
         try {
-            File rabbitImageFile = new File("bolliger-gerard-ex1/images/rabbit.png");
+            File rabbitImageFile = new File("images/rabbit.png");
             this.rabbitImage = ImageIO.read(rabbitImageFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Can't read rabbit image.");
+            rabbitImage = null;
         }
     }
 
