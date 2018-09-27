@@ -3,8 +3,8 @@ import uchicago.src.sim.gui.SimGraphics;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -43,11 +43,10 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 		setBirthThreshold(birthThreshold);
 
         try {
-            File rabbitImageFile =
-                    new File("rabbits/bolliger-gerard-ex1/images/rabbit.png");
-            this.rabbitImage = ImageIO.read(rabbitImageFile);
+            InputStream stream = getClass().getResourceAsStream("rabbit.png");
+            this.rabbitImage = ImageIO.read(stream);
         } catch (IOException e) {
-            System.err.println("Can't read rabbit image.");
+            e.printStackTrace();
             rabbitImage = null;
         }
     }
