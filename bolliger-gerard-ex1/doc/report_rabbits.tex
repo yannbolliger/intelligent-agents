@@ -2,7 +2,10 @@
 
 \usepackage{amsmath}
 \usepackage{textcomp}
+\usepackage{float}
 \usepackage[top=0.8in, bottom=0.8in, left=0.8in, right=0.8in]{geometry}
+\usepackage{graphicx}
+\graphicspath{ {./} }
 % Add other packages here %
 
 
@@ -12,20 +15,20 @@
 \author{Group \textnumero: 90  Kyle Gérard, Yann Bolliger}
 
 \begin{document}
-\maketitle
+ \maketitle
 
-\section{Implementation}
+ \section{Implementation}
 
 \subsection{Assumptions}
 \begin{itemize}
 
-\item 
-Our grass growth is bounded above linearly. We choose \texttt{grassGrowthRate} 
-squares at each iteration tick and put grass on them. Regardless of whether 
-there has already been grass or not. In that manner we add \textit{at most} \texttt{grassGrowthRate} 
+\item
+Our grass growth is bounded above linearly. We choose \texttt{grassGrowthRate}
+squares at each iteration tick and put grass on them. Regardless of whether
+there has already been grass or not. In that manner we add \textit{at most} \texttt{grassGrowthRate}
 new squares of grass at each tick.
 
-\item 
+\item
 The energy of the grass in a cell is always equal to \texttt{grassEnergy}.
 This can be adjusted as a parameter.
 
@@ -34,7 +37,7 @@ This can be adjusted as a parameter.
  - if rabbits can't move, they don't move but they still loose energy (1)
  - rabbits can go back and forth
  - default birth energy 30
- 
+
 \end{itemize}
 
 
@@ -43,33 +46,88 @@ This can be adjusted as a parameter.
 % Provide important details about your implementation, such as handling
 of boundary conditions %
 
-\section{Results}
-% In this section, you study and describe how different variables
-(e.g. birth threshold, grass growth rate etc.) or combinations of variables
-influence the results. Different experiments with diffrent settings are
-described below with your observations and analysis
+ \section{Results}
+ % In this section, you study and describe how different variables
+ (e.g. birth threshold, grass growth rate etc.) or combinations of variables
+ influence the results. Different experiments with diffrent settings are
+ described below with your observations and analysis
 
-\subsection{Experiment 1}
+ \subsection{Experiment 1}
+ \subsubsection{Setting}
+ fixed parameters:
+ \begin{table}[H]
+  \begin{tabular}{llll}
+   &BirthThreshold  &10\\
+   &GrassEnergy  &4 \\
+   &GrassGrowthRate  &9\\
+   &GridSize  &20*20\\
+   &InitialNumberOfRabbits  &100
+  \end{tabular}
+ \end{table}
+ \subsubsection{Observations}
+ \includegraphics[width=\textwidth]{exp1.png}
+ These parameters are enough to sustain rabbit life with a population oscillating between 10 and 40 rabbits. This seems reasonable since 36 units of grass energy (GrassEnergy*GrassGrowthrate) are generated at every tick and each rabbit uses 1 unit of energy also at each step. Thus with this setting, the environment is not able to sustain more than 36 rabbits for long periods but is abundant in grass enough for some rabbits to survive.
 
-\subsubsection{Setting}
+ We remark that neither the grass amount nor the rabbit populations are stable but instead they oscillate periodically like a sinusoid. Their periods seem to be very similar, however they are inversely synchronized (when the rabbit population goes up, the grass amount goes down; when the rabbit population goes up, the grass amount goes down).
 
-\subsubsection{Observations}
-% Elaborate on the observed results %
 
-\subsection{Experiment 2}
+ \subsection{Experiment 2}
+ \subsubsection{Setting}
+ All parameters except the GrassGrowthRate are fixed:
+ \begin{table}[H]
+  \begin{tabular}{llll}
+   &BirthThreshold  &40\\
+   &GrassEnergy  &5 \\
+   &GrassGrowthRate  &x between 0 and 100\\
+   &GridSize  &20*20\\
+   &InitialNumberOfRabbits  &100
+  \end{tabular}
+ \end{table}
 
-\subsubsection{Setting}
+ \subsubsection{Observations}
+ \includegraphics[width=\textwidth]{grassgrowth.png}
+ As seen in the graph above, the population of rabbits increases linearly in function of the GrassGrowthRate until the max number of rabbits is reached ( 400 which is the number of places on the 20*20 grid.
 
-\subsubsection{Observations}
-% Elaborate on the observed results %
+ The actual rabbit population follows closely the theoretical maximum sustainable population (GrassEnergy*GrassGrowthRate).
 
-\vdots
+ \vdots
 
-\subsection{Experiment n}
+ \subsection{Experiment 3}
+ \subsubsection{Setting}
+ All parameters except the GrassEnergy are fixed:
+ \begin{table}[H]
+  \begin{tabular}{llll}
+   &BirthThreshold  &40\\
+   &GrassEnergy  &x between 0 and 30 \\
+   &GrassGrowthRate  &5\\
+   &GridSize  &20*20\\
+   &InitialNumberOfRabbits  &100
+  \end{tabular}
+ \end{table}
 
-\subsubsection{Setting}
+ \subsubsection{Observations}
+ \includegraphics[width=\textwidth]{grassenergy.png}
+ As seen in the graph above and similarly to the previous experiment, the population of rabbits increases linearly in function of the grassEnergy until the max number of rabbits is reached ( 400 which is the number of places on the 20*20 grid.
 
-\subsubsection{Observations}
-% Elaborate on the observed results %
+ The actual rabbit population follows closely the theoretical maximum sustainable population (GrassEnergy*GrassGrowthRate).
+
+ \subsection{Experiment 4}
+ \subsubsection{Setting}
+ Two similar experiments but with different BirthThresholds (100 and 2):
+ \begin{table}[H]
+  \begin{tabular}{llll}
+   &BirthThreshold  &experiment a) 100 ; experiment b) 2\\
+   &GrassEnergy  &5\\
+   &GrassGrowthRate  &15\\
+   &GridSize  &20*20\\
+   &InitialNumberOfRabbits  &100
+  \end{tabular}
+ \end{table}
+
+ \subsubsection{Observations}
+
+ \includegraphics[width=10cm]{fast_sinusoid.png}
+ \includegraphics[width=10cm]{slow_sinusoid.png}
+ As seen in the above graphs, the periods of the sinusoid like rabbit population are much longer and its amplitude smaller with a high birth Threshold compared to a low one. Indeed, with a 100 BithThreshold we observe a period of around 200 steps and a amplitude of around 20 (population oscillates between 40 and 60 rabbits). With a 2 birthThreshold, the period is only  around 25 steps and the amplitude is above 90 (population oscillates between 10 and 100 rabbits).
 
 \end{document}
