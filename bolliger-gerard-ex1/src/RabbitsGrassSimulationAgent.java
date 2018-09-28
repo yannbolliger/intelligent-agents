@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Class that implements the simulation agent for the rabbits grass simulation.
 
- * @author
+ * @author Kyle Gerard, Yann Bolliger
  */
 
 public class RabbitsGrassSimulationAgent implements Drawable {
@@ -125,7 +125,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
                     break;
             }
         }
-        // TODO what happens if not able to move?
+        // Rabbit stays where it is if it can't move
     }
 
     private void takeGrass() {
