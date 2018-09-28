@@ -182,7 +182,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     }
 
     public void setGridSize(int gridSize) {
-        this.gridSize = gridSize;
+        this.gridSize = Math.max(1, gridSize);
     }
 
     public int getBirthThreshold() {
@@ -190,7 +190,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     }
 
     public void setBirthThreshold(int birthThreshold) {
-        this.birthThreshold = birthThreshold;
+        this.birthThreshold = Math.max(0, birthThreshold);
     }
 
     public int getNumber() {
@@ -198,7 +198,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     }
 
     public void setNumber(int numberOfRabbits) {
-        this.numberOfRabbits = numberOfRabbits;
+        this.numberOfRabbits =  Math.max(0, numberOfRabbits);
     }
 
     public int getGrassGrowthRate() {
@@ -206,7 +206,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     }
 
     public void setGrassGrowthRate(int grassGrowth) {
-        this.grassGrowth = grassGrowth;
+        this.grassGrowth = Math.max(0, grassGrowth);
     }
 
     public int getGrassEnergy() {
@@ -214,7 +214,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
     }
 
     public void setGrassEnergy(int grassEnergy) {
-        this.grassEnergy = grassEnergy;
+        this.grassEnergy = Math.max(0, grassEnergy);
     }
 
     public static void main(String[] args) {
