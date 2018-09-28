@@ -9,7 +9,6 @@
 % Add other packages here %
 
 
-
 % Put your group number and names in the author field %
 \title{\bf Excercise 1.\\ Implementing a first Application in RePast: A Rabbits Grass Simulation.}
 \author{Group \textnumero: 90  Kyle Gérard, Yann Bolliger}
@@ -22,35 +21,56 @@
 \subsection{Assumptions}
 \begin{itemize}
 
-\item
-Our grass growth is bounded above linearly. We choose \texttt{grassGrowthRate}
-squares at each iteration tick and put grass on them. Regardless of whether
-there has already been grass or not. In that manner we add \textit{at most} \texttt{grassGrowthRate}
+\item 
+Our grass growth is bounded above linearly. We choose \texttt{grassGrowthRate} 
+squares at each iteration tick and put grass on them. Regardless of whether 
+there has already been grass or not. In that manner we add \textit{at most} \texttt{grassGrowthRate} 
 new squares of grass at each tick.
 
-\item
+\item 
 The energy of the grass in a cell is always equal to \texttt{grassEnergy}.
 This can be adjusted as a parameter.
 
+ \item
+ At birth, rabbits are placed at a random free cell. This can also be a cell 
+ with grass in it.
  
- - rabbits can be born on grass
- - if rabbits can't move, they don't move but they still loose energy (1)
- - rabbits can go back and forth
- - default birth energy 30
-
+ \item
+  Rabbits loose one energy point at each tick. This is the case even if the rabbit is
+  surrounded on all sides by other rabbits and can't move therefore.
+  
+  \item
+   Rabbits move completely randomly. For each tick, each rabbit chooses among 
+   the four possible directions and takes the first one that is not blocked by 
+   another rabbit. This means that rabbits can also go back and forth.
+   
+   \item
+   The first generation of rabbits that appear in the space at the start of the simulation
+   have all a default birth energy of 30 points. 
 \end{itemize}
 
 
+ \subsection{Implementation Remarks}
+ \begin{itemize}
 
-\subsection{Implementation Remarks}
-% Provide important details about your implementation, such as handling
-of boundary conditions %
+   \item
+   We added another user-facing  parameter: \texttt{grassEnergy}. All the
+ adjustable parameters are bounded  below by 0 but not above. Except for the
+ grid size that has to be at least 1.
+
+ \item
+ Another edge case is when a rabbit cannot move because it is surrounded by
+ other rabbits. In that case the rabbit will just stay where it is.
+
+  \item
+ Another edge case is when a rabbit cannot move because it is surrounded by
+ other rabbits. In that case the rabbit will just stay where it is.
+
+ \end{itemize}
+
+ \newpage
 
  \section{Results}
- % In this section, you study and describe how different variables
- (e.g. birth threshold, grass growth rate etc.) or combinations of variables
- influence the results. Different experiments with diffrent settings are
- described below with your observations and analysis
 
  \subsection{Experiment 1}
  \subsubsection{Setting}
@@ -64,8 +84,13 @@ of boundary conditions %
    &InitialNumberOfRabbits  &100
   \end{tabular}
  \end{table}
+ 
  \subsubsection{Observations}
- \includegraphics[width=\textwidth]{exp1.png}
+ 
+ \begin{center}
+ \includegraphics[width=6cm]{exp1.png}
+ \end{center}
+ 
  These parameters are enough to sustain rabbit life with a population oscillating between 10 and 40 rabbits. This seems reasonable since 36 units of grass energy (GrassEnergy*GrassGrowthrate) are generated at every tick and each rabbit uses 1 unit of energy also at each step. Thus with this setting, the environment is not able to sustain more than 36 rabbits for long periods but is abundant in grass enough for some rabbits to survive.
 
  We remark that neither the grass amount nor the rabbit populations are stable but instead they oscillate periodically like a sinusoid. Their periods seem to be very similar, however they are inversely synchronized (when the rabbit population goes up, the grass amount goes down; when the rabbit population goes up, the grass amount goes down).
@@ -85,6 +110,7 @@ of boundary conditions %
  \end{table}
 
  \subsubsection{Observations}
+ 
  \includegraphics[width=\textwidth]{grassgrowth.png}
  As seen in the graph above, the population of rabbits increases linearly in function of the GrassGrowthRate until the max number of rabbits is reached ( 400 which is the number of places on the 20*20 grid.
 
