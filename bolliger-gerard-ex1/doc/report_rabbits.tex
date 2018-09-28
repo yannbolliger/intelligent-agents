@@ -17,16 +17,27 @@
 \section{Implementation}
 
 \subsection{Assumptions}
-In our model the grass growth is bounded above linearly. 
-That means that in each tick of the simulation there are \textit{at most} \texttt{grassGrowthRate} 
-new squares of grass. For each of them we choose one square at random and put grass there even 
-if it was already present. The energy of the grass in a cell is always equal to 
-\texttt{grassEnergy}. This can be adjusted as a parameter.
+\begin{itemize}
+
+\item 
+Our grass growth is bounded above linearly. We choose \texttt{grassGrowthRate} 
+squares at each iteration tick and put grass on them. Regardless of whether 
+there has already been grass or not. In that manner we add \textit{at most} \texttt{grassGrowthRate} 
+new squares of grass at each tick.
+
+\item 
+The energy of the grass in a cell is always equal to \texttt{grassEnergy}.
+This can be adjusted as a parameter.
+
  
  - rabbits can be born on grass
  - if rabbits can't move, they don't move but they still loose energy (1)
  - rabbits can go back and forth
  - default birth energy 30
+ 
+\end{itemize}
+
+
 
 \subsection{Implementation Remarks}
 % Provide important details about your implementation, such as handling
