@@ -21,7 +21,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private Agent myAgent;
 	private Map<State, Action> strategy;
 	private TaskDistribution td;
-	private Topology topology;
     private double cost_per_km;
 
 	@Override
@@ -35,7 +34,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		this.numActions = 0;
 		this.myAgent = agent;
 		this.td = td;
-		this.topology = topology;
 		this.cost_per_km = myAgent.vehicles().get(0).costPerKm();
 
 		// spaces
