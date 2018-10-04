@@ -24,7 +24,7 @@ public final class State {
     }
 
     public boolean hasDestination() {
-        return to == null;
+        return to != null;
     }
 
     @Override

@@ -21,7 +21,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private Agent myAgent;
 	private Map<State, Action> strategy;
 	private TaskDistribution td;
-    private double cost_per_km;
+    private double costPerKm;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -34,7 +34,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		this.numActions = 0;
 		this.myAgent = agent;
 		this.td = td;
-		this.cost_per_km = myAgent.vehicles().get(0).costPerKm();
+		this.costPerKm = myAgent.vehicles().get(0).costPerKm();
 
 		// spaces
         List<State> stateSpace = stateSpace(topology);
@@ -46,6 +46,9 @@ public class ReactiveTemplate implements ReactiveBehavior {
         Map<State, Action> best = new HashMap<>();
 
         do {
+            v = newV;
+            newV = new HashMap<>();
+
             for (State s : stateSpace) {
                 double max = Double.NEGATIVE_INFINITY;
                 ActionSpaceElem bestAction = null;
@@ -79,11 +82,12 @@ public class ReactiveTemplate implements ReactiveBehavior {
         for (State s : v.keySet()) {
             squares += Math.pow(v.get(s) - vPrime.get(s), 2);
         }
+        System.out.println(squares/v.size());
         return squares/v.size() < EPSILON;
     }
 
 	private double transition(State s, ActionSpaceElem a, State sPrime) {
-	    if (!s.getTo().equals(sPrime.getCurrent())) return 0;
+	    if (!sPrime.getCurrent().equals(s.getTo())) return 0;
 
 	    // pickup action
 	    if (a.isPickupAction()) {
@@ -100,15 +104,16 @@ public class ReactiveTemplate implements ReactiveBehavior {
     private double reward(State s, ActionSpaceElem a) {
 
         if (a.isMoveAction()){
-            return -cost_per_km * s.getCurrent().distanceTo(a.getMoveToCity());
+            return -costPerKm * s.getCurrent().distanceTo(a.getMoveToCity());
         }
 
         // if pickup with no available task => impossible
-        if(!s.hasDestination()){
+        if (!s.hasDestination()) {
             return Double.NEGATIVE_INFINITY;
         }
 
-        return td.reward(s.getCurrent(), s.getTo()) - cost_per_km * s.getCurrent().distanceTo(s.getTo());
+        return td.reward(s.getCurrent(), s.getTo()) -
+                costPerKm * s.getCurrent().distanceTo(s.getTo());
     }
 
 	private List<State> stateSpace(Topology topology) {
