@@ -13,7 +13,7 @@ import logist.task.TaskDistribution;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
 
-public class ReactiveAgent implements ReactiveBehavior {
+public class ReactiveRLAAgent implements ReactiveBehavior {
 
     private static double EPSILON = 0.001;
 
