@@ -15,7 +15,7 @@ import logist.topology.Topology.City;
 
 public class ReactiveTemplate implements ReactiveBehavior {
 
-    private static double EPSILON = 0.1;
+    private static double EPSILON = 0.001;
 
 	private int numActions;
 	private Agent myAgent;
@@ -82,34 +82,44 @@ public class ReactiveTemplate implements ReactiveBehavior {
         for (State s : v.keySet()) {
             squares += Math.pow(v.get(s) - vPrime.get(s), 2);
         }
-        System.out.println(squares/v.size());
         return squares/v.size() < EPSILON;
     }
 
-	private double transition(State s, ActionSpaceElem a, State sPrime) {
-	    if (!sPrime.getCurrent().equals(s.getTo())) return 0;
-
+	private double transition(State current, ActionSpaceElem a, State next) {
 	    // pickup action
 	    if (a.isPickupAction()) {
-	        if (s.getTo() == null) return 0;
-	        else return td.probability(s.getCurrent(), s.getTo());
+	        // there must be a task to pick up
+	        if (!current.hasDestination()) return 0;
+
+	        // the next state must start in the destination city
+            if (!next.getCurrent().equals(current.getTo())) return 0;
+
+	        return td.probability(next.getCurrent(), next.getTo());
         }
         // move action
 	    else {
-	        if (!s.getCurrent().hasNeighbor(a.getMoveToCity())) return 0;
-	        else return 1;
+	        City moveCity = a.getMoveToCity();
+
+	        boolean moveCityIsNeighbor =
+                    current.getCurrent().hasNeighbor(moveCity);
+
+	        boolean nextStateIsMoveCity = next.getCurrent().equals(moveCity);
+
+	        if (moveCityIsNeighbor && nextStateIsMoveCity) {
+                return td.probability(next.getCurrent(), next.getTo());
+            }
+	        else return 0;
         }
     }
 
     private double reward(State s, ActionSpaceElem a) {
-
-        if (a.isMoveAction()){
-            return -costPerKm * s.getCurrent().distanceTo(a.getMoveToCity());
+        // illegal combinations give 0 reward
+        if (a.isPickupAction() && !s.hasDestination()) {
+            return Double.NEGATIVE_INFINITY;
         }
 
-        // if pickup with no available task => impossible
-        if (!s.hasDestination()) {
-            return Double.NEGATIVE_INFINITY;
+        if (a.isMoveAction()) {
+            return -costPerKm * s.getCurrent().distanceTo(a.getMoveToCity());
         }
 
         return td.reward(s.getCurrent(), s.getTo()) -
@@ -122,7 +132,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
             stateSpace.add(new State(c, null));
 
             for (City to : topology.cities()) {
-                stateSpace.add(new State(c, to));
+                if (!c.equals(to)) stateSpace.add(new State(c, to));
             }
         }
         return stateSpace;
