@@ -20,6 +20,9 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private int numActions;
 	private Agent myAgent;
 	private Map<State, Action> strategy;
+	private TaskDistribution td;
+	private Topology topology;
+    private double cost_per_km;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -31,10 +34,13 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		this.numActions = 0;
 		this.myAgent = agent;
+		this.td = td;
+		this.topology = topology;
+		this.cost_per_km = myAgent.vehicles().get(0).costPerKm();
 
 		// spaces
         List<State> stateSpace = stateSpace(topology);
-        List<Action> actionSpace = actionSpace(topology);
+        List<ActionSpaceElem> actionSpace = actionSpace(topology);
 
         // "tables"
         Map<State, Double> v = new HashMap<>();
@@ -44,9 +50,9 @@ public class ReactiveTemplate implements ReactiveBehavior {
         do {
             for (State s : stateSpace) {
                 double max = Double.MIN_VALUE;
-                Action bestAction = null;
+                ActionSpaceElem bestAction = null;
 
-                for (Action a: actionSpace) {
+                for (ActionSpaceElem a: actionSpace) {
 
                     double sum = 0;
                     for (State sPrime : stateSpace) {
@@ -62,7 +68,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
                     }
                 }
                 newV.put(s, max);
-                best.put(s, bestAction);
+                best.put(s, bestAction.getAction());
             }
         } while (!goodEnough(v, newV));
 
@@ -93,8 +99,13 @@ public class ReactiveTemplate implements ReactiveBehavior {
         }
     }
 
-    private double reward(State s, Action a) {
-        return 0.0;
+    private double reward(State s, ActionSpaceElem a) {
+
+        if (a.isMoveAction()){
+            return -cost_per_km * s.getCurrent().distanceTo(a.getMoveToCity());
+        }
+
+        return td.reward(s.getCurrent(), s.getTo()) - cost_per_km * s.getCurrent().distanceTo(s.getTo());
     }
 
 	private List<State> stateSpace(Topology topology) {
@@ -109,12 +120,12 @@ public class ReactiveTemplate implements ReactiveBehavior {
         return stateSpace;
     }
 
-    private List<Action> actionSpace(Topology topology) {
-        List<Action> actionSpace = new ArrayList<>();
-        actionSpace.add(new Pickup(null));
+    private List<ActionSpaceElem> actionSpace(Topology topology) {
+        List<ActionSpaceElem> actionSpace = new ArrayList<>();
+        actionSpace.add(new ActionSpaceElem(new Pickup(null)));
 
         for (City c : topology.cities()) {
-            actionSpace.add(new Move(c));
+            actionSpace.add(new ActionSpaceElem(new Move(c), c));
         }
         return actionSpace;
     }
