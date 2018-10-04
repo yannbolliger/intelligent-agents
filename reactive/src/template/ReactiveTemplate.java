@@ -94,7 +94,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
         }
         // move action
 	    else {
-	        if (!s.getCurrent().hasNeighbor(a.moveToCity())) return 0;
+	        if (!s.getCurrent().hasNeighbor(a.getMoveToCity())) return 0;
 	        else return 1;
         }
     }
