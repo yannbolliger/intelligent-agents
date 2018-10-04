@@ -2,11 +2,17 @@
 
 <agents>
 	<!-- A list of agents and their behavior classes -->
-	
+
+	<agent name="dummy-agent">
+		<set class-path="bin/"/>
+		<set class-name="template.DummyAgent"/>
+		<set discount-factor=".85"/>
+	</agent>
+
 	<!-- #### REACTIVE AGENTS ### -->
 	<agent name="reactive-rla">
 		<set class-path="bin/"/>
-		<set class-name="template.ReactiveTemplate"/>
+		<set class-name="template.ReactiveAgent"/>
 		<set discount-factor=".85"/>
 	</agent>
 	
