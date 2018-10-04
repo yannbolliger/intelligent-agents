@@ -78,8 +78,19 @@ public class ReactiveTemplate implements ReactiveBehavior {
         return squares/v.size() < EPSILON;
     }
 
-	private double transition(State s, Action a, State sPrime) {
-	    return 0.0;
+	private double transition(State s, ActionSpaceElem a, State sPrime) {
+	    if (!s.getTo().equals(sPrime.getCurrent())) return 0;
+
+	    // pickup action
+	    if (a.isPickupAction()) {
+	        if (s.getTo() == null) return 0;
+	        else return td.probability(s.getCurrent(), s.getTo());
+        }
+        // move action
+	    else {
+	        if (!s.getCurrent().hasNeighbor(a.moveToCity())) return 0;
+	        else return 1;
+        }
     }
 
     private double reward(State s, Action a) {
