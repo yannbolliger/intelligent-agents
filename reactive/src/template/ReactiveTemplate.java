@@ -1,6 +1,6 @@
 package template;
 
-import java.util.Random;
+import java.util.*;
 
 import logist.simulation.Vehicle;
 import logist.agent.Agent;
@@ -15,38 +15,119 @@ import logist.topology.Topology.City;
 
 public class ReactiveTemplate implements ReactiveBehavior {
 
-	private Random random;
-	private double pPickup;
+    private static double EPSILON = 0.1;
+
 	private int numActions;
 	private Agent myAgent;
+	private Map<State, Action> strategy;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
 
 		// Reads the discount factor from the agents.xml file.
 		// If the property is not present it defaults to 0.95
-		Double discount = agent.readProperty("discount-factor", Double.class,
-				0.95);
+		final double discount = agent
+                .readProperty("discount-factor", Double.class, 0.95);
 
-		this.random = new Random();
-		this.pPickup = discount;
 		this.numActions = 0;
 		this.myAgent = agent;
+
+		// spaces
+        List<State> stateSpace = stateSpace(topology);
+        List<Action> actionSpace = actionSpace(topology);
+
+        // "tables"
+        Map<State, Double> v = new HashMap<>();
+        Map<State, Double> newV = new HashMap<>();
+        Map<State, Action> best = new HashMap<>();
+
+        do {
+            for (State s : stateSpace) {
+                double max = Double.MIN_VALUE;
+                Action bestAction = null;
+
+                for (Action a: actionSpace) {
+
+                    double sum = 0;
+                    for (State sPrime : stateSpace) {
+                        sum += transition(s, a, sPrime) *
+                                v.getOrDefault(sPrime, 0.0);
+                    }
+
+                    double value = reward(s, a) + discount * sum;
+
+                    if (value > max) {
+                        max = value;
+                        bestAction = a;
+                    }
+                }
+                newV.put(s, max);
+                best.put(s, bestAction);
+            }
+        } while (!goodEnough(v, newV));
+
+        strategy = Collections.unmodifiableMap(best);
 	}
+
+	private boolean goodEnough(Map<State, Double> v, Map<State, Double> vPrime) {
+        double squares = 0;
+
+        for (State s : v.keySet()) {
+            squares += Math.pow(v.get(s) - vPrime.get(s), 2);
+        }
+        return squares/v.size() < EPSILON;
+    }
+
+	private double transition(State s, Action a, State sPrime) {
+	    return 0.0;
+    }
+
+    private double reward(State s, Action a) {
+        return 0.0;
+    }
+
+	private List<State> stateSpace(Topology topology) {
+        List<State> stateSpace = new ArrayList<>();
+        for (City c : topology.cities()) {
+            stateSpace.add(new State(c, null));
+
+            for (City to : topology.cities()) {
+                stateSpace.add(new State(c, to));
+            }
+        }
+        return stateSpace;
+    }
+
+    private List<Action> actionSpace(Topology topology) {
+        List<Action> actionSpace = new ArrayList<>();
+        actionSpace.add(new Pickup(null));
+
+        for (City c : topology.cities()) {
+            actionSpace.add(new Move(c));
+        }
+        return actionSpace;
+    }
 
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
-		Action action;
 
-		if (availableTask == null || random.nextDouble() > pPickup) {
-			City currentCity = vehicle.getCurrentCity();
-			action = new Move(currentCity.randomNeighbor(random));
-		} else {
-			action = new Pickup(availableTask);
-		}
+	    final City destination = (availableTask != null) ?
+                availableTask.deliveryCity : null;
+
+	    final State state = new State(vehicle.getCurrentCity(), destination);
+
+	    Action action = strategy.get(state);
+
+	    if (action instanceof Pickup) {
+	        action = new Pickup(availableTask);
+        }
 		
 		if (numActions >= 1) {
-			System.out.println("The total profit after "+numActions+" actions is "+myAgent.getTotalProfit()+" (average profit: "+(myAgent.getTotalProfit() / (double)numActions)+")");
+			System.out.println("The total profit after " +
+                    numActions+" actions is " + myAgent.getTotalProfit() +
+                    " (average profit: " +
+                    (myAgent.getTotalProfit() / (double)numActions) + ")"
+            );
 		}
 		numActions++;
 		
