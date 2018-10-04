@@ -47,7 +47,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
         do {
             for (State s : stateSpace) {
-                double max = Double.MIN_VALUE;
+                double max = Double.NEGATIVE_INFINITY;
                 ActionSpaceElem bestAction = null;
 
                 for (ActionSpaceElem a: actionSpace) {
@@ -101,6 +101,11 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
         if (a.isMoveAction()){
             return -cost_per_km * s.getCurrent().distanceTo(a.getMoveToCity());
+        }
+
+        // if pickup with no available task => impossible
+        if(!s.hasDestination()){
+            return Double.NEGATIVE_INFINITY;
         }
 
         return td.reward(s.getCurrent(), s.getTo()) - cost_per_km * s.getCurrent().distanceTo(s.getTo());
