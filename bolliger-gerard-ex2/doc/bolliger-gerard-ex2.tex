@@ -2,12 +2,17 @@
 
 \usepackage{amsmath}
 \usepackage{textcomp}
+\usepackage{float}
 \usepackage[top=0.8in, bottom=0.8in, left=0.8in, right=0.8in]{geometry}
-% add other packages here
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\graphicspath{ {./} }
+% Add other packages here %
+
 
 % put your group number and names in the author field
 \title{\bf Exercise 2: A Reactive Agent for the Pickup and Delivery Problem}
-\author{Group \textnumero: Student 1, Student 2}
+\author{Group \textnumero: 90  Kyle Gerard, Yann Bolliger}
 
 % the report should not be longer than 3 pages
 
@@ -17,7 +22,30 @@
 \section{Problem Representation}
 
 \subsection{Representation Description}
-% describe how you design the state representation, the possible actions, the reward table and the probability transition table
+
+We wanted our state to contain two types of information: the current city of the 
+agent as well as the fact whether there is a task available in this city. For 
+the tasks, we also need to distinguish between the different destinations of the 
+tasks. Therefore our state is modelled by a tuple from the set:
+$$
+\mathcal{S} = \{ (c_{current}, c_{destination}) | 
+c_{current} \in \mathcal{C},  
+c_{destination} \in (\mathcal{C} - \{ c_{current}\}) \cup \{\mathtt{null}\} }
+ \}
+$$
+where $\mathcal{C}$ is the set of all cities. Note that $\mathtt{null}$ denotes 
+the case where there is no task available in the current city.
+The exclusion of $c_{current}$ in the second place encodes that there are no 
+tasks with delivery city equal to the pickup city.
+
+Our actions are either a \texttt{Pickup} for the given task or a move to a 
+neighboring city given by the set:
+$$
+\mathcal{A} = \{ \mathtt{Pickup} \} \cup \{ \mathtt{Move}(c) | c \in \mathcal{C} \}
+$$
+
+
+
 
 \subsection{Implementation Details}
 % describe the implementation details of the representations above and the implementation details of the reinforcement learning algorithm you implemented
