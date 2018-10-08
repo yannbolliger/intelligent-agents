@@ -12,7 +12,7 @@
 	<agent name="reactive-rla">
 		<set class-path="bin/"/>
 		<set class-name="template.ReactiveRLAAgent"/>
-		<set discount-factor="0"/>
+		<set discount-factor=".85"/>
 	</agent>
 
 	<agent name="reactive-dummy">
