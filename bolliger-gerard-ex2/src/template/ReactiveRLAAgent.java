@@ -53,7 +53,7 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
                 double max = Double.NEGATIVE_INFINITY;
                 ActionSpaceElem bestAction = null;
 
-                for (ActionSpaceElem a: actionSpace) {
+                for (ActionSpaceElem a: getPossibleActions(s, actionSpace)) {
 
                     double sum = 0;
                     for (State sPrime : stateSpace) {
@@ -76,7 +76,21 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
         strategy = Collections.unmodifiableMap(best);
 	}
 
-	private boolean goodEnough(Map<State, Double> v, Map<State, Double> vPrime) {
+	private List<ActionSpaceElem> getPossibleActions(State currentState, List<ActionSpaceElem> actionSpace){
+        List<ActionSpaceElem> possibleActions = new ArrayList<>();
+
+        for (ActionSpaceElem a: actionSpace) {
+            if (a.isMoveAction() && currentState.getCurrent().hasNeighbor(a.getMoveToCity())){
+                possibleActions.add(a);
+            }
+            else if (a.isPickupAction() && currentState.hasDestination()) {
+                possibleActions.add(a);
+            }
+        }
+        return possibleActions;
+    }
+
+    private boolean goodEnough(Map<State, Double> v, Map<State, Double> vPrime) {
         double squares = 0;
 
         for (State s : v.keySet()) {
@@ -90,8 +104,6 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
 	private double transition(State current, ActionSpaceElem a, State next) {
 	    // pickup action
 	    if (a.isPickupAction()) {
-	        // there must be a task to pick up
-	        if (!current.hasDestination()) return 0;
 
 	        // the next state must start in the destination city
             if (!next.getCurrent().equals(current.getTo())) return 0;
@@ -102,12 +114,9 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
 	    else {
 	        City moveCity = a.getMoveToCity();
 
-	        boolean moveCityIsNeighbor =
-                    current.getCurrent().hasNeighbor(moveCity);
-
 	        boolean nextStateIsMoveCity = next.getCurrent().equals(moveCity);
 
-	        if (moveCityIsNeighbor && nextStateIsMoveCity) {
+	        if (nextStateIsMoveCity) {
                 return td.probability(next.getCurrent(), next.getTo());
             }
 	        else return 0;

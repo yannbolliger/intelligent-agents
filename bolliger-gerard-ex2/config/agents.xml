@@ -9,11 +9,15 @@
 		<set discount-factor=".85"/>
 	</agent>
 
-	<!-- #### REACTIVE AGENTS ### -->
 	<agent name="reactive-rla">
 		<set class-path="bin/"/>
 		<set class-name="template.ReactiveRLAAgent"/>
-		<set discount-factor=".85"/>
+		<set discount-factor="0"/>
 	</agent>
-	
+
+	<agent name="reactive-dummy">
+		<set class-path="bin/"/>
+		<set class-name="template.ReactiveDummyAgent"/>
+		<set discount-factor="0.3"/>
+	</agent>
 </agents>
