@@ -1,6 +1,7 @@
 \documentclass[11pt]{article}
 
 \usepackage{amsmath}
+\usepackage{amssymb} 
 \usepackage{textcomp}
 \usepackage{float}
 \usepackage[top=0.8in, bottom=0.8in, left=0.8in, right=0.8in]{geometry}
@@ -38,17 +39,83 @@ the case where there is no task available in the current city.
 The exclusion of $c_{current}$ in the second place encodes that there are no 
 tasks with delivery city equal to the pickup city.
 
-Our actions are either a \texttt{Pickup} for the given task or a move to a 
+Our actions are either a \texttt{Pickup} for the given task or a \texttt{Move} to a 
 neighboring city given by the set:
 $$
 \mathcal{A} = \{ \mathtt{Pickup} \} \cup \{ \mathtt{Move}(c) | c \in \mathcal{C} \}
 $$
 
+Given this representation of the problem the reward table $R(s, a)$ is defined in 
+straight-forward way. It is the expected reward 
+the agent gets for a delivery $r(c_i, c_j)$ minus the cost
+for the travelled distance:
+$$
+R(s = (c_i, c_j) , a) = \begin{cases}
+r(c_i, c_j) - k  \cdot d(c_i, c_j) , &  \text{if } a = \mathtt{Pickup} \\
+- k  \cdot d(c_i, c_{neighbor}) , & \text{if } a = \mathtt{Move}(c_{neighbor}) 
+\end{cases}
+$$
+where $d()$ is the function that calculates the optimal distances and $k$ is the cost 
+per kilometer of the vehicle. 
+
+In order to explain the transition table $T(s, a, s')$ we have to think about 
+what it means to go from a state $(c_i, c_j)$ to a state $(c_n, c_m)$. It is 
+important to note that  $T(s, a, s') = \mathbb{P}(s' | s, a)$. The action that 
+the agent takes is given. 
+ 
+ \begin{enumerate}
+   
+\item 
+If the agent does \texttt{Move},  
+he ends up in state $(c_n, c_m)$ if $c_n$ is a neighbor of $c_i$ and if there is 
+a task to city $c_m$ (or \texttt{null}) in $c_n$.
+This happens with the probability  given by the provided distribution $p(c_n, c_m)$.
+
+\item If the agent does \texttt{Pickup},  
+he ends up in state $(c_n, c_m)$ if $c_n$ is the destination of the task and if there is 
+a task to city $c_m$ (or \texttt{null}) in $c_n$.
+This happens also with the probability $p(c_n, c_m)$.
+
+\item 
+In all other cases the transition is impossible, therefore $T(s, a, s') = 0$. 
+This can happen if the action is \texttt{Pickup} but there is no task or if the 
+end and start cities are not the same or not neighbors.
+
+\end{enumerate}
 
 
 
 \subsection{Implementation Details}
-% describe the implementation details of the representations above and the implementation details of the reinforcement learning algorithm you implemented
+For our states and actions, we created two specific classes to model 
+them exactly as described above: \texttt{State, ActionSpaceElem}.
+Additionally, there are two methods that return the state space $\mathcal{S}$ and the set of 
+actions $\mathcal{A}$. This allows us to loop naturally over the entire 
+spaces as in the theoretical pseudo-code (e.g $\forall s \in \mathcal{S}$). 
+
+However, in order to avoid bugs in the extreme case where $\gamma = 0$ 
+and to be faster, we filter the actions that are used in the loop of the value 
+iteration based on the current state of the outer loop. This is done by the 
+method \texttt{getPossibleActions(s, actionSpace)}. The method filters for 
+example all \texttt{Move} actions that lead to non-neighboring cities. Also, in 
+the case $\gamma = 0$, it prevents the agent from wanting to move to the city 
+where it currently is.
+
+The value iteration algorithm stops when the approximation of $V(s)$ is ``good 
+enough''.
+We chose to calculate the mean square error between the $V(s)$ of two 
+consecutive iterations and to stop the algorithm when the error was $ < 
+\epsilon = 10^{-16}$. This corresponds to approximately 200 iterations for
+the french map and we found that an $\epsilon < 10^{-16}$ didn't provide any 
+advantage because the strategy $Best(s)$ usually converges much faster.
+
+
+Finally, our $V(s)$ and $Best(s)$ are implemented using \texttt{HashMap}s for 
+optimal performance. We provided the \texttt{State} class with an appropriate 
+hash-function. In the \texttt{act} mehtod it is then sufficient to instantiate 
+the state based on the arguments of the function and to retrieve the best action 
+from the latest $Best(s)$. This happens in $\mathcal{O}(1)$ time thanks to the 
+\texttt{HashMap}.
+
 
 \section{Results}
 % in this section, you describe several results from the experiments with your reactive agent
