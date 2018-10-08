@@ -44,7 +44,7 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
         Map<State, Double> v = new HashMap<>();
         Map<State, Double> newV = new HashMap<>();
         Map<State, Action> best = new HashMap<>();
-        
+
         do {
             v = newV;
             newV = new HashMap<>();
@@ -77,8 +77,7 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
 	}
 
 	private List<ActionSpaceElem> getPossibleActions(
-	        State currentState,
-            List<ActionSpaceElem> actionSpace) {
+	        State currentState, List<ActionSpaceElem> actionSpace) {
 
         List<ActionSpaceElem> possibleActions = new ArrayList<>();
 
@@ -107,33 +106,20 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
     }
 
 	private double transition(State current, ActionSpaceElem a, State next) {
-	    // pickup action
-	    if (a.isPickupAction()) {
 
-	        // the next state must start in the destination city
-            if (!next.getCurrent().equals(current.getTo())) return 0;
-
-	        return td.probability(next.getCurrent(), next.getTo());
+	    // pickup action: the next state must start in the destination city
+	    if (a.isPickupAction() && !next.getCurrent().equals(current.getTo())) {
+	        return 0;
         }
         // move action
-	    else {
-	        City moveCity = a.getMoveToCity();
-
-	        boolean nextStateIsMoveCity = next.getCurrent().equals(moveCity);
-
-	        if (nextStateIsMoveCity) {
-                return td.probability(next.getCurrent(), next.getTo());
-            }
-	        else return 0;
+	    else if (!a.isPickupAction() &&
+                !next.getCurrent().equals(a.getMoveToCity())) {
+	        return 0;
         }
+        return td.probability(next.getCurrent(), next.getTo());
     }
 
     private double reward(State s, ActionSpaceElem a) {
-        // illegal combinations give 0 reward
-        if (a.isPickupAction() && !s.hasDestination()) {
-            return Double.NEGATIVE_INFINITY;
-        }
-
         if (a.isMoveAction()) {
             return -costPerKm * s.getCurrent().distanceTo(a.getMoveToCity());
         }
