@@ -15,7 +15,7 @@ import logist.topology.Topology.City;
 
 public class ReactiveRLAAgent implements ReactiveBehavior {
 
-    private static double EPSILON = 0.001;
+    private static double EPSILON = 0.00001;
 
 	private int numActions;
 	private Agent myAgent;
@@ -82,7 +82,9 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
         for (State s : v.keySet()) {
             squares += Math.pow(v.get(s) - vPrime.get(s), 2);
         }
-        return squares/v.size() < EPSILON;
+        double meanSquareError = squares/v.size();
+
+        return meanSquareError < EPSILON;
     }
 
 	private double transition(State current, ActionSpaceElem a, State next) {
