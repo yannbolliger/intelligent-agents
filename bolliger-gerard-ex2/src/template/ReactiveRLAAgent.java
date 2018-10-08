@@ -15,7 +15,7 @@ import logist.topology.Topology.City;
 
 public class ReactiveRLAAgent implements ReactiveBehavior {
 
-    private static double EPSILON = 0.00001;
+    private static double EPSILON = 0.0000000000000001;
 
 	private int numActions;
 	private Agent myAgent;
@@ -44,7 +44,7 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
         Map<State, Double> v = new HashMap<>();
         Map<State, Double> newV = new HashMap<>();
         Map<State, Action> best = new HashMap<>();
-
+        
         do {
             v = newV;
             newV = new HashMap<>();
@@ -76,11 +76,15 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
         strategy = Collections.unmodifiableMap(best);
 	}
 
-	private List<ActionSpaceElem> getPossibleActions(State currentState, List<ActionSpaceElem> actionSpace){
+	private List<ActionSpaceElem> getPossibleActions(
+	        State currentState,
+            List<ActionSpaceElem> actionSpace) {
+
         List<ActionSpaceElem> possibleActions = new ArrayList<>();
 
         for (ActionSpaceElem a: actionSpace) {
-            if (a.isMoveAction() && currentState.getCurrent().hasNeighbor(a.getMoveToCity())){
+            if (a.isMoveAction() &&
+                    currentState.getCurrent().hasNeighbor(a.getMoveToCity())) {
                 possibleActions.add(a);
             }
             else if (a.isPickupAction() && currentState.hasDestination()) {
@@ -93,11 +97,12 @@ public class ReactiveRLAAgent implements ReactiveBehavior {
     private boolean goodEnough(Map<State, Double> v, Map<State, Double> vPrime) {
         double squares = 0;
 
-        for (State s : v.keySet()) {
-            squares += Math.pow(v.get(s) - vPrime.get(s), 2);
+        for (State s : vPrime.keySet()) {
+            double vs      = v.getOrDefault(s, 0d);
+            double vsPrime = vPrime.getOrDefault(s, 0d);
+            squares += Math.pow(vs - vsPrime, 2);
         }
-        double meanSquareError = squares/v.size();
-
+        double meanSquareError = squares/vPrime.size();
         return meanSquareError < EPSILON;
     }
 
