@@ -126,26 +126,51 @@ from the latest $Best(s)$. This happens in $\mathcal{O}(1)$ time thanks to the
 
 \subsubsection{Setting}
 % you describe how you perform the experiment (you also need to specify the configuration used for the experiment)
+ \begin{table}[H]
+  \begin{tabular}{llll}
+   &\texttt{map }  &Netherlands / France\\
+   &\texttt{config}  & given config files reactive2.xml and reactive.xml \\
+   &\texttt{agent}  &reactive-rla\\
+   &\texttt{discount factor}  &$x$ between [0, 1[\\
+   &\texttt{steps}  &2000
+  \end{tabular}
+ \end{table}
 
 \subsubsection{Observations}
 % you describe the experimental results and the conclusions you inferred from these results
 
 \subsection{Experiment 2: Comparisons with dummy agents}
 % you compare the results of your agent with two dummy agents: the random agent that was already given in the starter files and another dummy agent that you define and create. You should report the results from the simulations using the topologies given in the starter files and optionally, additional topologies that you create.
+ \includegraphics[width=0.5\textwidth]{netherlands.png}
+ \includegraphics[width=0.5\textwidth]{france.png}
+In this experiment we examine how the discount factor influences the behavior of the agent and thus its profit. As seen in both of the above graphs, with these settings, higher discount factors lead to higher average profits per action (and of consequently higher total profits) with a large number of steps. This makes sense as a high discount factor encourages the agent to take good long term decisions by giving more importance to the values of the future states it might travel to. With a low discount factor, short term rewards are prioritized. The reason why the lowest average profit is with a 0 discount factor is because this means the agent is completely blind to the values of the states around him and thus moves randomly to a neighboring city when there is no task in a city. 
+
+However, a lower discount factor does not always mean a lower profit depending on how many steps the simulation lasts. Indeed, during our first version of this experiment we only used 200 steps to compare the average profits of different discount values. However, as the tasks and rewards are generated randomly, we observed that the highest profits were between 0.6 and 0.7 discount values. This randomness means that even though an agent has the best policy, it may not have the best profit after a given finite number of steps.
+Finally, we observe that with a higher discount factor, the learning phase lasts more iterations and converges more slowly. In the extreme case with a discount factor of 1, it does not converge.
 
 \subsubsection{Setting}
 % you describe how you perform the experiment and you describe the dummy agent you created (you also need to specify the configuration used for the experiment)
+ \begin{table}[H]
+  \begin{tabular}{llll}
+   &\texttt{map }  &Netherlands / France\\
+   &\texttt{config}  & given config files reactive2.xml and reactive.xml \\
+   &\texttt{agent}  &reactive-rla reactive-dummy reactive-random\\
+   &\texttt{discount factor}  &0.6\\
+   &\texttt{steps}  &2000
+  \end{tabular}
+ \end{table}
+ 
+ The reactive-random agent uses random Move decisions and a pickup probability = 0.6 when a task is available.
+The reactive-Dummy agent has a 100 percent pickup probability and always moves to closest neighboring City.
 
+ 
 \subsubsection{Observations}
 % elaborate on the observed results
+ \includegraphics[width=0.6\textwidth]{agents.png}
 
-\vdots
+In the above bar chart we observe that the best performing agent is the smart rla agent and the worst is the random agent. The reason why the random agent is so much worse than the other agents with both topologies is mainly because it does not pickup a large proportion of tasks (40%).
 
-\subsection{Experiment n}
-% other experiments you would like to present
+We also remark that the rla agent and the Dummy agent’s average profits are relatively close. By observing the rla agent’s policy we see that it almost always picks up a task when one is available (as opposed to Moving to a neighboring city instead). This means that the only difference between the two agents is the slight advantage the rla agent has in choosing which city to move to when no task is available (because it knows which neighboring city has the most value).
 
-\subsubsection{Setting}
-
-\subsubsection{Observations}
 
 \end{document}
