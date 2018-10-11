@@ -38,7 +38,7 @@ public class State {
                 newCarriedTasks.remove(task);
 
                 State next = new State(position, newCarriedTasks, pendingTasks);
-                nextStates.put(next, _(new Delivery(task), 0));
+                nextStates.put(next, deliveryWithCost(task));
             }
         }
 
@@ -55,16 +55,16 @@ public class State {
 
                 State next = new State(position, newCarriedTasks,
                         newPendingTasks);
-                nextStates.put(next, _(new Pickup(task), 0));
+
+                nextStates.put(next, pickUpWithCost(task));
             }
         }
 
         // can always move to neighbors
         for (City neighbor : position.neighbors()) {
             State next = new State(neighbor, carriedTasks, pendingTasks);
-            double cost = position.distanceTo(neighbor) * costPerKm;
-
-            nextStates.put(next, _(new Move(neighbor), cost));
+            
+            nextStates.put(next, moveWithCost(neighbor, costPerKm));
         }
 
         return Collections.unmodifiableMap(nextStates);
@@ -101,7 +101,31 @@ public class State {
         return pendingTasks;
     }
 
-    private Entry<Action, Double> _(Action a, double c) {
-        return new AbstractMap.SimpleImmutableEntry<>(a, c);
+    private Entry<Action, Double> deliveryWithCost(Task t) {
+        double costOfDelivery = 0;
+
+        return new AbstractMap.SimpleImmutableEntry<>(
+                new Delivery(t),
+                costOfDelivery
+        );
+    }
+
+    private Entry<Action, Double> pickUpWithCost(Task t) {
+        double costOfPickup = 0;
+
+        return new AbstractMap.SimpleImmutableEntry<>(
+                new Pickup(t),
+                costOfPickup
+        );
+    }
+
+    private Entry<Action, Double> moveWithCost(City neighbor, double costPerKm) {
+        double cost = position.distanceTo(neighbor) * costPerKm;
+
+        return new AbstractMap.SimpleImmutableEntry<>(
+                new Move(neighbor),
+                cost
+        );
     }
 }
+

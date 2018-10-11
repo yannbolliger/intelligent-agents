@@ -33,6 +33,7 @@ public class AStarSearchPlan {
         Queue<Node> agenda = new PriorityQueue<>();
         agenda.add(initialNode);
 
+        // keeps track of visited states and the cost of their path
         Map<State, Double> visitedNodes = new HashMap<>();
 
         while (!agenda.isEmpty()) {
@@ -42,10 +43,12 @@ public class AStarSearchPlan {
                 return new Plan(vehicle.getCurrentCity(), next.actions);
             }
 
-            if (!visitedNodes.containsKey(next.state) ||
+            boolean notVisited = !visitedNodes.containsKey(next.state);
+            boolean visitedWithHigherCost =
                     visitedNodes.containsKey(next.state) &&
-                            visitedNodes.get(next.state) > next.cost) {
+                    visitedNodes.get(next.state) > next.cost;
 
+            if (notVisited || visitedWithHigherCost) {
                 visitedNodes.put(next.state, next.cost);
 
                 List<Node> successors = next.successors();
@@ -53,6 +56,7 @@ public class AStarSearchPlan {
             }
         }
 
+        // failure
         return Plan.EMPTY;
     }
 
@@ -75,6 +79,11 @@ public class AStarSearchPlan {
             return cost + getHeuristic();
         }
 
+        @Override
+        public int compareTo(Node o) {
+            return new Double(this.f()).compareTo(o.f());
+        }
+
         public List<Node> successors() {
             Map<State, Entry<Action, Double>> nextStates = state.nextStates(
                     vehicle.capacity(),
@@ -83,14 +92,15 @@ public class AStarSearchPlan {
 
             List<Node> successors = new ArrayList<>();
 
-            for(Entry<State, Entry<Action, Double>> entry :
+            for (Entry<State, Entry<Action, Double>> entry :
                     nextStates.entrySet())
             {
-                State nextState = entry.getKey();
-                Action actionTaken = entry.getValue().getKey();
+                State  nextState    = entry.getKey();
+                Action actionTaken  = entry.getValue().getKey();
                 double costOfAction = entry.getValue().getValue();
 
                 double newCost = cost + costOfAction;
+
                 List<Action> newActions = new ArrayList<>(actions);
                 newActions.add(actionTaken);
 
@@ -99,11 +109,6 @@ public class AStarSearchPlan {
             }
 
             return successors;
-        }
-
-        @Override
-        public int compareTo(Node o) {
-            return new Double(this.f()).compareTo(o.f());
         }
     }
 }
