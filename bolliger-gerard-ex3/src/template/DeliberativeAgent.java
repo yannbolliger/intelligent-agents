@@ -14,8 +14,7 @@ import logist.topology.Topology.City;
 /**
  * An optimal planner for one vehicle.
  */
-@SuppressWarnings("unused")
-public class DeliberativeTemplate implements DeliberativeBehavior {
+public class DeliberativeAgent implements DeliberativeBehavior {
 
 	enum Algorithm { BFS, ASTAR }
 	
@@ -37,10 +36,10 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 		this.agent = agent;
 		
 		// initialize the planner
-		int capacity = agent.vehicles().get(0).capacity();
-		String algorithmName = agent.readProperty("algorithm", String.class, "ASTAR");
-		
+		capacity = agent.vehicles().get(0).capacity();
+
 		// Throws IllegalArgumentException if algorithm is unknown
+        String algorithmName = agent.readProperty("algorithm", String.class, "ASTAR");
 		algorithm = Algorithm.valueOf(algorithmName.toUpperCase());
 		
 		// ...
@@ -50,18 +49,15 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	public Plan plan(Vehicle vehicle, TaskSet tasks) {
 		Plan plan;
 
-		// Compute the plan with the selected algorithm.
 		switch (algorithm) {
-		case ASTAR:
-			// ...
-			plan = naivePlan(vehicle, tasks);
-			break;
-		case BFS:
-			// ...
-			plan = naivePlan(vehicle, tasks);
-			break;
-		default:
-			throw new AssertionError("Should not happen.");
+            case ASTAR:
+                plan = naivePlan(vehicle, tasks);
+                break;
+            case BFS:
+                plan = naivePlan(vehicle, tasks);
+                break;
+            default:
+                throw new AssertionError("Should not happen.");
 		}		
 		return plan;
 	}
