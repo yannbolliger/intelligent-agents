@@ -3,6 +3,7 @@ package template;
 import logist.plan.Action;
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
+import logist.task.Task;
 import logist.task.TaskSet;
 
 import java.util.*;
@@ -63,20 +64,35 @@ public class AStarSearchPlan {
     private class Node implements Comparable<Node> {
         private final State state;
         private final double cost;
+        private final double heuristic;
         private final List<Action> actions;
 
         public Node(State state, double cost, List<Action> actions) {
             this.state = state;
             this.cost = cost;
             this.actions = actions;
+            this.heuristic = calculateHeuristic();
         }
 
         public double getHeuristic() {
-            return 0;
+            return heuristic;
+        }
+
+        private double calculateHeuristic() {
+            double maxSingleCost = 0;
+
+            for (Task task: state.getCarriedTasks()) {
+                double cost = task.pathLength() * vehicle.costPerKm();
+
+                if (cost > maxSingleCost) {
+                    maxSingleCost = cost;
+                }
+            }
+            return maxSingleCost;
         }
 
         public double f() {
-            return cost + getHeuristic();
+            return cost + heuristic;
         }
 
         @Override
@@ -85,10 +101,8 @@ public class AStarSearchPlan {
         }
 
         public List<Node> successors() {
-            Map<State, Entry<Action, Double>> nextStates = state.nextStates(
-                    vehicle.capacity(),
-                    vehicle.costPerKm()
-            );
+            Map<State, Entry<Action, Double>> nextStates =
+                    state.nextStates(vehicle.capacity(), vehicle.costPerKm());
 
             List<Node> successors = new ArrayList<>();
 
