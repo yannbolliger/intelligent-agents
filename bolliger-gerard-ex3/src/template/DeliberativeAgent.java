@@ -51,10 +51,10 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 
 		switch (algorithm) {
             case ASTAR:
-                plan = naivePlan(vehicle, tasks);
+                plan = bfsPlan(vehicle, tasks);
                 break;
             case BFS:
-                plan = naivePlan(vehicle, tasks);
+                plan = aStarPlan(vehicle, tasks);
                 break;
             default:
                 throw new AssertionError("Should not happen.");
@@ -62,28 +62,13 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		return plan;
 	}
 	
-	private Plan naivePlan(Vehicle vehicle, TaskSet tasks) {
-		City current = vehicle.getCurrentCity();
-		Plan plan = new Plan(current);
+	private Plan bfsPlan(Vehicle vehicle, TaskSet tasks) {
+	    return null;
+    }
 
-		for (Task task : tasks) {
-			// move: current city => pickup location
-			for (City city : current.pathTo(task.pickupCity))
-				plan.appendMove(city);
-
-			plan.appendPickup(task);
-
-			// move: pickup location => delivery location
-			for (City city : task.path())
-				plan.appendMove(city);
-
-			plan.appendDelivery(task);
-
-			// set current city
-			current = task.deliveryCity;
-		}
-		return plan;
-	}
+    private Plan aStarPlan(Vehicle vehicle, TaskSet tasks) {
+        return null;
+    }
 
 	@Override
 	public void planCancelled(TaskSet carriedTasks) {
