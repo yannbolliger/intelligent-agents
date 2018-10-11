@@ -16,6 +16,7 @@ public class State {
     private final TaskSet carriedTasks;
     private final TaskSet pendingTasks;
 
+
     public State(City position, TaskSet carriedTasks, TaskSet pendingTasks) {
         this.position = position;
         this.carriedTasks = carriedTasks;
@@ -81,5 +82,17 @@ public class State {
     @Override
     public int hashCode() {
         return Objects.hash(position, carriedTasks, pendingTasks);
+    }
+
+    public City getPosition() {
+        return position;
+    }
+
+    public TaskSet getCarriedTasks() {
+        return carriedTasks;
+    }
+
+    public TaskSet getPendingTasks() {
+        return pendingTasks;
     }
 }
