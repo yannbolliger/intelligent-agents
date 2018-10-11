@@ -9,6 +9,7 @@ import logist.task.TaskSet;
 import logist.topology.Topology.City;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 public class State {
 
@@ -23,8 +24,10 @@ public class State {
         this.pendingTasks = pendingTasks;
     }
 
-    public Map<State, Action> nextStates(int capacity) {
-        Map<State, Action> nextStates = new HashMap<>();
+    public Map<State, Entry<Action, Double>> nextStates(
+            int capacity, int costPerKm)
+    {
+        Map<State,  Entry<Action, Double>> nextStates = new HashMap<>();
         final int carriedSum = carriedTasks.weightSum();
 
         // check whether agent can deliver a task
@@ -35,7 +38,7 @@ public class State {
                 newCarriedTasks.remove(task);
 
                 State next = new State(position, newCarriedTasks, pendingTasks);
-                nextStates.put(next, new Delivery(task));
+                nextStates.put(next, _(new Delivery(task), 0));
             }
         }
 
@@ -52,14 +55,16 @@ public class State {
 
                 State next = new State(position, newCarriedTasks,
                         newPendingTasks);
-                nextStates.put(next, new Pickup(task));
+                nextStates.put(next, _(new Pickup(task), 0));
             }
         }
 
         // can always move to neighbors
         for (City neighbor : position.neighbors()) {
             State next = new State(neighbor, carriedTasks, pendingTasks);
-            nextStates.put(next, new Move(neighbor));
+            double cost = position.distanceTo(neighbor) * costPerKm;
+
+            nextStates.put(next, _(new Move(neighbor), cost));
         }
 
         return Collections.unmodifiableMap(nextStates);
@@ -94,5 +99,9 @@ public class State {
 
     public TaskSet getPendingTasks() {
         return pendingTasks;
+    }
+
+    private Entry<Action, Double> _(Action a, double c) {
+        return new AbstractMap.SimpleImmutableEntry<>(a, c);
     }
 }

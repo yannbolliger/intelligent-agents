@@ -54,7 +54,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
                 plan = bfsPlan(vehicle, tasks);
                 break;
             case BFS:
-                plan = aStarPlan(vehicle, tasks);
+                plan = new AStarSearchPlan(vehicle, tasks).plan();
                 break;
             default:
                 throw new AssertionError("Should not happen.");
@@ -64,10 +64,6 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 	
 	private Plan bfsPlan(Vehicle vehicle, TaskSet tasks) {
 	    return null;
-    }
-
-    private Plan aStarPlan(Vehicle vehicle, TaskSet tasks) {
-        return null;
     }
 
 	@Override
