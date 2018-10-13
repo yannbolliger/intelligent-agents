@@ -1,6 +1,7 @@
 package template;
 
 /* import table */
+import logist.plan.Action;
 import logist.simulation.Vehicle;
 import logist.agent.Agent;
 import logist.behavior.DeliberativeBehavior;
@@ -10,6 +11,12 @@ import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * An optimal planner for one vehicle.
@@ -48,13 +55,12 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 	@Override
 	public Plan plan(Vehicle vehicle, TaskSet tasks) {
 		Plan plan;
-
 		switch (algorithm) {
             case ASTAR:
-                plan = bfsPlan(vehicle, tasks);
+                plan = new AStarSearchPlan(vehicle, tasks).plan();
                 break;
             case BFS:
-                plan = new AStarSearchPlan(vehicle, tasks).plan();
+                plan = bfsPlan(vehicle, tasks);
                 break;
             default:
                 throw new AssertionError("Should not happen.");
@@ -63,7 +69,35 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 	}
 	
 	private Plan bfsPlan(Vehicle vehicle, TaskSet tasks) {
-	    return null;
+
+        LinkedList<StatePlanPair> q = new LinkedList();
+        List<State> cyleSet = new ArrayList<>();
+
+        State startState = new State(vehicle.getCurrentCity(), vehicle.getCurrentTasks(), tasks);
+
+        q.add(new StatePlanPair(startState, new LinkedList<Action>()));
+        cyleSet.add(startState);
+
+	    while (!q.isEmpty()) {
+            StatePlanPair statePlanPair = q.poll();
+
+            if (statePlanPair.getState().isGoal()) {
+                return new Plan(vehicle.getCurrentCity(), statePlanPair.getActions());
+            }
+
+            Map<State, Entry<Action, Double>> children = statePlanPair.getState().nextStates(capacity, vehicle.costPerKm());
+
+            for(Entry<State, Entry<Action, Double>> child : children.entrySet()) {
+                List<Action> childPlan = statePlanPair.getActions();
+                childPlan.add(child.getValue().getKey());
+
+                if (! cyleSet.contains(child.getKey())) {
+                    cyleSet.add(child.getKey());
+                    q.addLast(new StatePlanPair(child.getKey(), childPlan));
+                }
+            }
+        }
+        return null;
     }
 
 	@Override
