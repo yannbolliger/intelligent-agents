@@ -64,7 +64,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
                 break;
             default:
                 throw new AssertionError("Should not happen.");
-		}		
+		}
 		return plan;
 	}
 	
@@ -72,6 +72,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 
         LinkedList<StatePlanPair> q = new LinkedList();
         List<State> cyleSet = new ArrayList<>();
+		List<Plan> goalPlanSet = new ArrayList<>();
 
         State startState = new State(vehicle.getCurrentCity(), vehicle.getCurrentTasks(), tasks);
 
@@ -82,7 +83,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
             StatePlanPair statePlanPair = q.poll();
 
             if (statePlanPair.getState().isGoal()) {
-                return new Plan(vehicle.getCurrentCity(), statePlanPair.getActions());
+				goalPlanSet.add(new Plan(vehicle.getCurrentCity(), statePlanPair.getActions()));
             }
 
             Map<State, Entry<Action, Double>> children = statePlanPair.getState().nextStates(capacity);
@@ -97,7 +98,18 @@ public class DeliberativeAgent implements DeliberativeBehavior {
                 }
             }
         }
-        return null;
+
+
+        double minDistance = Double.POSITIVE_INFINITY;
+	    Plan bestPlan = null;
+        for (Plan p : goalPlanSet) {
+        	double planDistance = p.totalDistance();
+        	if (planDistance < minDistance) {
+        		minDistance = planDistance;
+        		bestPlan = p;
+			}
+		}
+        return bestPlan;
     }
 
 	@Override
