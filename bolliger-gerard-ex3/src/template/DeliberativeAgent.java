@@ -74,7 +74,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
         /**
          * We don't need to do anything here, because our planning classes
          * always check for vehicle.getCurrentTasks() and therefore already
-         * consider teh carriedTasks.
+         * consider the carriedTasks.
          */
 	}
 }
