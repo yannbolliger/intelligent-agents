@@ -5,6 +5,7 @@ import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.task.TaskSet;
+import logist.topology.Topology;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -74,15 +75,21 @@ public class AStarSearchPlan {
             this.heuristic = calculateHeuristic();
         }
 
-        public double getHeuristic() {
-            return heuristic;
-        }
-
         private double calculateHeuristic() {
             double maxSingleCost = 0;
+            Topology.City pos = state.getPosition();
 
             for (Task task: state.getCarriedTasks()) {
-                double cost = task.pathLength() * vehicle.costPerKm();
+                double cost = pos.distanceTo(task.deliveryCity);
+
+                if (cost > maxSingleCost) {
+                    maxSingleCost = cost;
+                }
+            }
+
+            for (Task task : state.getPendingTasks()) {
+                double cost =
+                        pos.distanceTo(task.pickupCity) + task.pathLength();
 
                 if (cost > maxSingleCost) {
                     maxSingleCost = cost;
@@ -102,7 +109,7 @@ public class AStarSearchPlan {
 
         public List<Node> successors() {
             Map<State, Entry<Action, Double>> nextStates =
-                    state.nextStates(vehicle.capacity(), vehicle.costPerKm());
+                    state.nextStates(vehicle.capacity());
 
             List<Node> successors = new ArrayList<>();
 

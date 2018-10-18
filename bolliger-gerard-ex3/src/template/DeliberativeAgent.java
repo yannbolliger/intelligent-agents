@@ -85,13 +85,13 @@ public class DeliberativeAgent implements DeliberativeBehavior {
                 return new Plan(vehicle.getCurrentCity(), statePlanPair.getActions());
             }
 
-            Map<State, Entry<Action, Double>> children = statePlanPair.getState().nextStates(capacity, vehicle.costPerKm());
+            Map<State, Entry<Action, Double>> children = statePlanPair.getState().nextStates(capacity);
 
             for(Entry<State, Entry<Action, Double>> child : children.entrySet()) {
                 List<Action> childPlan = statePlanPair.getActions();
                 childPlan.add(child.getValue().getKey());
 
-                if (! cyleSet.contains(child.getKey())) {
+                if (!cyleSet.contains(child.getKey())) {
                     cyleSet.add(child.getKey());
                     q.addLast(new StatePlanPair(child.getKey(), childPlan));
                 }

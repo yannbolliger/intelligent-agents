@@ -24,9 +24,8 @@ public class State {
         this.pendingTasks = pendingTasks;
     }
 
-    public Map<State, Entry<Action, Double>> nextStates(
-            int capacity, int costPerKm)
-    {
+    public Map<State, Entry<Action, Double>> nextStates(int capacity) {
+
         Map<State,  Entry<Action, Double>> nextStates = new HashMap<>();
         final int carriedSum = carriedTasks.weightSum();
 
@@ -64,7 +63,7 @@ public class State {
         for (City neighbor : position.neighbors()) {
             State next = new State(neighbor, carriedTasks, pendingTasks);
             
-            nextStates.put(next, moveWithCost(neighbor, costPerKm));
+            nextStates.put(next, moveWithCost(neighbor));
         }
 
         return Collections.unmodifiableMap(nextStates);
@@ -119,8 +118,8 @@ public class State {
         );
     }
 
-    private Entry<Action, Double> moveWithCost(City neighbor, double costPerKm) {
-        double cost = position.distanceTo(neighbor) * costPerKm;
+    private Entry<Action, Double> moveWithCost(City neighbor) {
+        double cost = position.distanceTo(neighbor);
 
         return new AbstractMap.SimpleImmutableEntry<>(
                 new Move(neighbor),
