@@ -26,7 +26,7 @@ public class BFSearchPlan {
         State startState = new State(
                 vehicle.getCurrentCity(), vehicle.getCurrentTasks(), tasks);
 
-        q.add(new StatePlanPair(startState, new LinkedList<>()));
+        q.add(new StatePlanPair(startState, new LinkedList<>(), 0));
         cyleSet.put(startState, 0d);
 
         while (!q.isEmpty()) {
@@ -37,9 +37,7 @@ public class BFSearchPlan {
                         new Plan(vehicle.getCurrentCity(),
                                 statePlanPair.getActions())
                 );
-            }
-
-            else {
+            } else {
                 Map<State, Map.Entry<Action, Double>> children =
                         statePlanPair.getState().nextStates(vehicle.capacity());
 
@@ -49,18 +47,15 @@ public class BFSearchPlan {
                     LinkedList<Action> childPlan = statePlanPair.getActions();
                     childPlan.add(child.getValue().getKey());
                     State childState = child.getKey();
+                    double childCost = statePlanPair.getCost() + child.getValue().getValue();
+                    StatePlanPair childStatePlanPair = new StatePlanPair(childState, childPlan, childCost);
 
                     boolean visited = cyleSet.containsKey(childState);
-                    boolean visitedWithHigherCost =
-                            cyleSet.get(childState) > new PlchildPlan
 
-
-                    if (!visited || visitedWithHigherCost) {
-                        cyleSet.add(child.getKey());
-                        q.addLast(new StatePlanPair(child.getKey(), childPlan));
+                    if (!visited || cyleSet.get(childState) > childStatePlanPair.getCost()) {
+                        cyleSet.put(childStatePlanPair.getState(), childStatePlanPair.getCost());
+                        q.addLast(childStatePlanPair);
                     }
-
-
                 }
             }
         }
@@ -80,17 +75,23 @@ public class BFSearchPlan {
     private class StatePlanPair {
         private State state;
         private LinkedList<Action> plan;
+        private double cost;
 
-        public StatePlanPair(State state, LinkedList<Action> plan) {
+        public StatePlanPair(State state, LinkedList<Action> plan, double cost) {
             this.state = state;
             this.plan = plan;
+            this.cost = cost;
         }
 
         public State getState() {
             return state;
         }
 
-        public  LinkedList<Action> getActions() {
+        public double getCost() {
+            return cost;
+        }
+
+        public LinkedList<Action> getActions() {
             return (LinkedList) plan.clone();
         }
     }
