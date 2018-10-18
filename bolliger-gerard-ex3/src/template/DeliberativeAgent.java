@@ -71,11 +71,10 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 
 	@Override
 	public void planCancelled(TaskSet carriedTasks) {
-		
-		if (!carriedTasks.isEmpty()) {
-			// This cannot happen for this simple agent, but typically
-			// you will need to consider the carriedTasks when the next
-			// plan is computed.
-		}
+        /**
+         * We don't need to do anything here, because our planning classes
+         * always check for vehicle.getCurrentTasks() and therefore already
+         * consider teh carriedTasks.
+         */
 	}
 }

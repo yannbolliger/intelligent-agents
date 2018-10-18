@@ -24,7 +24,10 @@ public class BFSearchPlan {
         List<Plan> goalPlanSet = new ArrayList<>();
 
         State startState = new State(
-                vehicle.getCurrentCity(), vehicle.getCurrentTasks(), tasks);
+                vehicle.getCurrentCity(),
+                vehicle.getCurrentTasks(),
+                tasks
+        );
 
         q.add(new StatePlanPair(startState, new LinkedList<>(), 0));
         cyleSet.put(startState, 0d);
@@ -37,7 +40,9 @@ public class BFSearchPlan {
                         new Plan(vehicle.getCurrentCity(),
                                 statePlanPair.getActions())
                 );
-            } else {
+            }
+
+            else {
                 Map<State, Map.Entry<Action, Double>> children =
                         statePlanPair.getState().nextStates(vehicle.capacity());
 
@@ -46,14 +51,23 @@ public class BFSearchPlan {
 
                     LinkedList<Action> childPlan = statePlanPair.getActions();
                     childPlan.add(child.getValue().getKey());
+
                     State childState = child.getKey();
-                    double childCost = statePlanPair.getCost() + child.getValue().getValue();
-                    StatePlanPair childStatePlanPair = new StatePlanPair(childState, childPlan, childCost);
+                    double childCost =
+                            statePlanPair.getCost() + child.getValue().getValue();
+
+                    StatePlanPair childStatePlanPair =
+                            new StatePlanPair(childState, childPlan, childCost);
 
                     boolean visited = cyleSet.containsKey(childState);
 
-                    if (!visited || cyleSet.get(childState) > childStatePlanPair.getCost()) {
-                        cyleSet.put(childStatePlanPair.getState(), childStatePlanPair.getCost());
+                    if (!visited ||
+                            cyleSet.get(childState) > childStatePlanPair.getCost()) {
+
+                        cyleSet.put(
+                                childStatePlanPair.getState(),
+                                childStatePlanPair.getCost()
+                        );
                         q.addLast(childStatePlanPair);
                     }
                 }

@@ -7,7 +7,7 @@
 	<agent name="deliberative-main">
 		<set class-path="bin/"/>
 		<set class-name="template.DeliberativeAgent"/>
-		<set algorithm="ASTAR"/>
+		<set algorithm="BFS"/>
 	</agent>
 	
 </agents>
