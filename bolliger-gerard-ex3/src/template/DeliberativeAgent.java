@@ -60,57 +60,14 @@ public class DeliberativeAgent implements DeliberativeBehavior {
                 plan = new AStarSearchPlan(vehicle, tasks).plan();
                 break;
             case BFS:
-                plan = bfsPlan(vehicle, tasks);
+                plan = new BFSearchPlan(vehicle, tasks).plan();
                 break;
             default:
                 throw new AssertionError("Should not happen.");
 		}
 		return plan;
 	}
-	
-	private Plan bfsPlan(Vehicle vehicle, TaskSet tasks) {
 
-        LinkedList<StatePlanPair> q = new LinkedList();
-        List<State> cyleSet = new ArrayList<>();
-		List<Plan> goalPlanSet = new ArrayList<>();
-
-        State startState = new State(vehicle.getCurrentCity(), vehicle.getCurrentTasks(), tasks);
-
-        q.add(new StatePlanPair(startState, new LinkedList<Action>()));
-        cyleSet.add(startState);
-
-	    while (!q.isEmpty()) {
-            StatePlanPair statePlanPair = q.poll();
-
-            if (statePlanPair.getState().isGoal()) {
-				goalPlanSet.add(new Plan(vehicle.getCurrentCity(), statePlanPair.getActions()));
-            }
-
-            Map<State, Entry<Action, Double>> children = statePlanPair.getState().nextStates(capacity);
-
-            for(Entry<State, Entry<Action, Double>> child : children.entrySet()) {
-                List<Action> childPlan = statePlanPair.getActions();
-                childPlan.add(child.getValue().getKey());
-
-                if (!cyleSet.contains(child.getKey())) {
-                    cyleSet.add(child.getKey());
-                    q.addLast(new StatePlanPair(child.getKey(), childPlan));
-                }
-            }
-        }
-
-
-        double minDistance = Double.POSITIVE_INFINITY;
-	    Plan bestPlan = null;
-        for (Plan p : goalPlanSet) {
-        	double planDistance = p.totalDistance();
-        	if (planDistance < minDistance) {
-        		minDistance = planDistance;
-        		bestPlan = p;
-			}
-		}
-        return bestPlan;
-    }
 
 	@Override
 	public void planCancelled(TaskSet carriedTasks) {
