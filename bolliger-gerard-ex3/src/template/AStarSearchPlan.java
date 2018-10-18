@@ -45,12 +45,7 @@ public class AStarSearchPlan {
                 return new Plan(vehicle.getCurrentCity(), next.actions);
             }
 
-            boolean notVisited = !visitedNodes.containsKey(next.state);
-            boolean visitedWithHigherCost =
-                    visitedNodes.containsKey(next.state) &&
-                    visitedNodes.get(next.state) > next.cost;
-
-            if (notVisited || visitedWithHigherCost) {
+            if (!visitedNodes.containsKey(next.state)) {
                 visitedNodes.put(next.state, next.cost);
 
                 List<Node> successors = next.successors();

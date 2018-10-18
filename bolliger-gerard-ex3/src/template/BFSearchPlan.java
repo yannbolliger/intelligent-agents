@@ -5,10 +5,7 @@ import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.TaskSet;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BFSearchPlan {
 
@@ -23,14 +20,14 @@ public class BFSearchPlan {
     public Plan plan() {
 
         LinkedList<StatePlanPair> q = new LinkedList();
-        List<State> cyleSet = new ArrayList<>();
+        Map<State, Double> cyleSet = new HashMap<>();
         List<Plan> goalPlanSet = new ArrayList<>();
 
         State startState = new State(
                 vehicle.getCurrentCity(), vehicle.getCurrentTasks(), tasks);
 
         q.add(new StatePlanPair(startState, new LinkedList<>()));
-        cyleSet.add(startState);
+        cyleSet.put(startState, 0d);
 
         while (!q.isEmpty()) {
             StatePlanPair statePlanPair = q.poll();
@@ -51,11 +48,19 @@ public class BFSearchPlan {
 
                     LinkedList<Action> childPlan = statePlanPair.getActions();
                     childPlan.add(child.getValue().getKey());
+                    State childState = child.getKey();
 
-                    if (!cyleSet.contains(child.getKey())) {
+                    boolean visited = cyleSet.containsKey(childState);
+                    boolean visitedWithHigherCost =
+                            cyleSet.get(childState) > new PlchildPlan
+
+
+                    if (!visited || visitedWithHigherCost) {
                         cyleSet.add(child.getKey());
                         q.addLast(new StatePlanPair(child.getKey(), childPlan));
                     }
+
+
                 }
             }
         }
