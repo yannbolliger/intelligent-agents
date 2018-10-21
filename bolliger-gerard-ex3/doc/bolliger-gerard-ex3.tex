@@ -97,7 +97,7 @@ For $\mathcal{O}(1)$ lookups of states for cycle detection and other lookups we
 always use a \texttt{HashMap} together with the hash function of the class 
 \texttt{State}.
 For the search agenda queue we rather use linked list in order to prevent costly 
-array copying. This makes our BFS reasonably fast for up to XXXX tasks.
+array copying. This makes our BFS reasonably fast for up to 11 tasks.
 
 \subsection{A*}
 As in BFS, we closely followed to algorithm given and made use of an admissible 
@@ -142,18 +142,25 @@ is admissible.
 
 \subsubsection{Setting}
 % Describe the settings of your experiment: topology, task configuration, etc. %
+The config file used was the one given in the handout called deliberative.xml with rngSeed left as is at 23456. Both the BFS and ASTAR algorithms were used. For each algorithm, we measured the time to compute the optimal plan as a function of the number of tasks to pickup nd deliver.  
 
 \subsubsection{Observations}
 % Describe the experimental results and the conclusions you inferred from these results %
-
+\begin{center}
+\includegraphics[width=12cm]{time.png}
+\end{center}
+As seen in the graph above, both the ASTAR and BFS algorithms' time to compute the optimal plan grow exponentially as a function of the number of tasks to deliver. We also remark that the ASTAR algorithm runs significantly faster than BFS. Using BFS we can build a plan with 11 tasks in 38 seconds. Using ASTAR we can build a plan with 13 tasks in 15 seconds. Therefore, even though both algorithms compute the optimal plan, ASTAR is more efficient than BFS. However as both algorithm's complexity is exponential, both algorithms are of limited use (much too slow) as the number of tasks increases.
 
 \subsection{Experiment 2: Multi-agent Experiments}
 % Observations in multi-agent experiments %
 
 \subsubsection{Setting}
 % Describe the settings of your experiment: topology, task configuration, etc. %
-
+Here we use the ASTAR algorithm for all agents because it is faster than BFS at calculating the optimal plan. Still using the deliberative.xml config file, we examine the behavior of agents depending on the number of agents in the environment.
 \subsubsection{Observations}
 % Describe the experimental results and the conclusions you inferred from these results %
-
+\begin{center}
+\includegraphics[width=6cm]{follow.png}
+\end{center}
+With more than one agent in the environment we rapidly observe that agents no longer act optimally. Indeed, their "optimal" plans computed by the ASTAR algorithm does not take into the other agents' plans. This means that agents will travel to  city to pickup a task even though another agent is closer to the city and thus will pickup the task first. In the figure above we see 3 agents going to the same pickup city even though there is only one task to be picked up. In this case the optimal plan would be to not try and pickup a task from a city when will reach it earlier. 
 \end{document}

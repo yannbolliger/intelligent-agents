@@ -55,6 +55,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 	@Override
 	public Plan plan(Vehicle vehicle, TaskSet tasks) {
 		Plan plan;
+		Long startTime = System.nanoTime();
 		switch (algorithm) {
             case ASTAR:
                 plan = new AStarSearchPlan(vehicle, tasks).plan();
@@ -65,6 +66,8 @@ public class DeliberativeAgent implements DeliberativeBehavior {
             default:
                 throw new AssertionError("Should not happen.");
 		}
+		Long elapsedTime = System.nanoTime() - startTime;
+		System.out.println("time to compute Plan with " + algorithm + " algo and " + tasks.size() + " tasks is: " + elapsedTime + " reward: " + plan.totalDistance());
 		return plan;
 	}
 
