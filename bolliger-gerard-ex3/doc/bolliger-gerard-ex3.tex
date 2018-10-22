@@ -118,14 +118,14 @@ list of search nodes in $\mathcal{O}(n \log n)$ time!
 The heuristic in our A*-Algorithm must be admissible. It is defined for a state 
 $S = (C, A_{carried}, A_{pending})$:
 
-$$
-h(S) = \max (h(A_{carried}), h(A_{pending})) 
-$$$$
-h(A_{carried}) = \max_{T \in A_{carried}} \text{distance}(C, \text{destination}(T))
-$$$$
-h(A_{pending}) = \max_{T \in A_{pending}} \text{distance}(C, \text{origin}(T)) + 
+\begin{eqnarray}
+h(S) &=& \max (h(A_{carried}), h(A_{pending}))  
+\\
+h(A_{carried}) &=& \max_{T \in A_{carried}} \text{distance}(C, \text{destination}(T))
+\\
+h(A_{pending}) &=& \max_{T \in A_{pending}} \text{distance}(C, \text{origin}(T)) + 
 \text{distance}(\text{origin}(T), \text{destination}(T))
-$$
+\end{eqnarray}
 
 This is admissible because if the agent has at least one pending task, it has \textit{at least}
 to go to the task's origin, pick it up and deliver it. In that case the heuristic exactly 
@@ -133,7 +133,14 @@ calculates the cost. If the agent has more tasks, the heuristic will underestima
 The same is true if the agent only has one carried task. Therefore the heuristic 
 is admissible.
 
---> monotonic, optimal?
+In order to have an optimal search algorithm the heuristic also needs to be 
+monotonic. This can be shown with the following argument. At start, the agent 
+has no picked up tasks and $h()$ will be according to $(3)$. This will not change 
+until the agent picks up the task that maximises $(3)$ because clearly
+$h(A_{carried}) \leq h(A_{pending}) $. Therefore, at each move, the heuristic changes with 
+\textit{at most} the distance of that move. This means $h()$ satisfies 
+$h(x) \leq d(x, y) + h(y)$, the condition for monotonicity. The same is true, once the agent has 
+picked up all tasks. Hence, the heuristic given above is monotonic.
 
 
 \section{Results}
