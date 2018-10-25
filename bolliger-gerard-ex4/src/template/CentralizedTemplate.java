@@ -1,7 +1,6 @@
 package template;
 
 //the list of imports
-import java.util.ArrayList;
 import java.util.List;
 import logist.LogistSettings;
 
@@ -10,11 +9,9 @@ import logist.agent.Agent;
 import logist.config.Parsers;
 import logist.simulation.Vehicle;
 import logist.plan.Plan;
-import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
-import logist.topology.Topology.City;
 
 /**
  * A very simple auction agent that assigns all tasks to its first vehicle and
@@ -27,7 +24,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
     private Topology topology;
     private TaskDistribution distribution;
     private Agent agent;
-    private long timeout_setup;
+    private long timeoutSetup;
     private long timeout_plan;
     
     @Override
@@ -43,8 +40,8 @@ public class CentralizedTemplate implements CentralizedBehavior {
             System.out.println("There was a problem loading the configuration file.");
         }
         
-        // the setup method cannot last more than timeout_setup milliseconds
-        timeout_setup = ls.get(LogistSettings.TimeoutKey.SETUP);
+        // the setup method cannot last more than timeoutSetup milliseconds
+        timeoutSetup = ls.get(LogistSettings.TimeoutKey.SETUP);
         // the plan method cannot execute more than timeout_plan milliseconds
         timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
         
@@ -55,24 +52,39 @@ public class CentralizedTemplate implements CentralizedBehavior {
 
     @Override
     public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-        long time_start = System.currentTimeMillis();
-        
-//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-        Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
+        long timeStart = System.currentTimeMillis();
+        long delta = 10;
 
-        List<Plan> plans = new ArrayList<Plan>();
-        plans.add(planVehicle1);
-        while (plans.size() < vehicles.size()) {
-            plans.add(Plan.EMPTY);
+        Solution solution = Solution.initial(vehicles, tasks);
+
+        while (!runningOutOfTime(timeStart, delta)) {
+            // TODO: Kyle
+            List<Solution> neighbors = solution.localNeighbors();
+            solution = localChoice(neighbors);
         }
-        
+
+        // log used time
         long time_end = System.currentTimeMillis();
-        long duration = time_end - time_start;
-        System.out.println("The plan was generated in "+duration+" milliseconds.");
+        long duration = time_end - timeStart;
+        System.out.println(
+                "The plan was generated in " +
+                        duration + " milliseconds."
+        );
         
-        return plans;
+        return solution.getPlans();
     }
 
+    private boolean runningOutOfTime(long timeStart, long delta) {
+        long elapsedTime = System.currentTimeMillis() - timeStart;
+
+        return elapsedTime >= timeout_plan - 2 * delta;
+    }
+
+    private Solution localChoice(List<Solution> solutions) {
+        // TODO: Kyle
+        return null;
+    }
+/*
     private Plan naivePlan(Vehicle vehicle, TaskSet tasks) {
         City current = vehicle.getCurrentCity();
         Plan plan = new Plan(current);
@@ -97,4 +109,5 @@ public class CentralizedTemplate implements CentralizedBehavior {
         }
         return plan;
     }
+    */
 }
