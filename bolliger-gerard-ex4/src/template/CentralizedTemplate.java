@@ -3,11 +3,8 @@ package template;
 //the list of imports
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import logist.LogistSettings;
 
-import logist.Measures;
-import logist.behavior.AuctionBehavior;
 import logist.behavior.CentralizedBehavior;
 import logist.agent.Agent;
 import logist.config.Parsers;
@@ -24,7 +21,7 @@ import logist.topology.Topology.City;
  * handles them sequentially.
  *
  */
-@SuppressWarnings("unused")
+
 public class CentralizedTemplate implements CentralizedBehavior {
 
     private Topology topology;
