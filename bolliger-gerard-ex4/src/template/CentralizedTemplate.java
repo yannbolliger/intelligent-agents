@@ -1,6 +1,7 @@
 package template;
 
 //the list of imports
+import java.util.ArrayList;
 import java.util.List;
 import logist.LogistSettings;
 
@@ -13,6 +14,8 @@ import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
 
+import javax.xml.transform.SourceLocator;
+
 /**
  * A very simple auction agent that assigns all tasks to its first vehicle and
  * handles them sequentially.
@@ -20,7 +23,7 @@ import logist.topology.Topology;
  */
 
 public class CentralizedTemplate implements CentralizedBehavior {
-
+    private static final double p = 0.6;
     private Topology topology;
     private TaskDistribution distribution;
     private Agent agent;
@@ -34,7 +37,7 @@ public class CentralizedTemplate implements CentralizedBehavior {
         // this code is used to get the timeouts
         LogistSettings ls = null;
         try {
-            ls = Parsers.parseSettings("config\\settings_default.xml");
+            ls = Parsers.parseSettings("config/settings_default.xml");
         }
         catch (Exception exc) {
             System.out.println("There was a problem loading the configuration file.");
@@ -57,10 +60,17 @@ public class CentralizedTemplate implements CentralizedBehavior {
 
         Solution solution = Solution.initial(vehicles, tasks);
 
+        List<Solution> neighbors = new ArrayList<>();
         while (!runningOutOfTime(timeStart, delta)) {
-            // TODO: Kyle
-            List<Solution> neighbors = solution.localNeighbors();
-            solution = localChoice(neighbors);
+            List<Solution> newNeighbors = solution.localNeighbors();
+            neighbors.addAll(neighbors);
+
+            Solution newSolution = localChoice(neighbors);
+
+            if (newSolution != null) {
+                solution = newSolution;
+                neighbors = new ArrayList<>();
+            }
         }
 
         // log used time
@@ -70,7 +80,6 @@ public class CentralizedTemplate implements CentralizedBehavior {
                 "The plan was generated in " +
                         duration + " milliseconds."
         );
-        
         return solution.getPlans();
     }
 
@@ -81,8 +90,19 @@ public class CentralizedTemplate implements CentralizedBehavior {
     }
 
     private Solution localChoice(List<Solution> solutions) {
-        // TODO: Kyle
-        return null;
+        if (Math.random() > p) {
+            return null;
+        }
+        double minCost = Double.POSITIVE_INFINITY;
+        Solution bestSolution = null;
+        for(Solution solution : solutions) {
+            Double solutionCost = solution.getCost();
+            if (solutionCost < minCost){
+                bestSolution = solution;
+                minCost = solutionCost;
+            }
+        }
+        return bestSolution;
     }
 /*
     private Plan naivePlan(Vehicle vehicle, TaskSet tasks) {
