@@ -11,20 +11,20 @@ import java.util.*;
 public class Solution {
 
 
-    private final Map<Vehicle, LinkedList<TaskAction>> taskAssignment;
+    private final Map<Vehicle, ActionSequence> assignments;
     private final List<Vehicle> vehicles;
 
-    private Solution(Map<Vehicle, LinkedList<TaskAction>> taskAssignment,
+    private Solution(Map<Vehicle, ActionSequence> taskAssignment,
                      List<Vehicle> vehicles) {
 
-        this.taskAssignment = taskAssignment;
+        this.assignments = taskAssignment;
         this.vehicles = vehicles;
     }
 
     public static Solution initial(List<Vehicle> vehicles, TaskSet tasks) {
-        Map<Vehicle, LinkedList<TaskAction>> taskAssignments = new HashMap();
+        Map<Vehicle, ActionSequence> taskAssignments = new HashMap();
         for (Vehicle vehicle: vehicles) {
-            taskAssignments.put(vehicle, new LinkedList<>());
+            taskAssignments.put(vehicle, new ActionSequence());
         }
 
         for (Task task : tasks){
@@ -32,29 +32,26 @@ public class Solution {
             Vehicle bestVehicle = null;
 
             for (Vehicle vehicle: vehicles) {
-                LinkedList<TaskAction> existingAssignment =
-                        taskAssignments.get(vehicle);
+                 ActionSequence actionSequence = taskAssignments.get(vehicle);
 
                 City vehicleNextPosition = vehicle.getCurrentCity();
-                if (!existingAssignment.isEmpty()){
-                    vehicleNextPosition =
-                            existingAssignment.getLast().getTask().deliveryCity;
+                if (!actionSequence.isEmpty()){
+                    vehicleNextPosition = actionSequence.getEndPosition();
                 }
 
                 double costToPickup = vehicle.costPerKm()
                         * vehicleNextPosition.distanceTo(task.pickupCity);
 
-                // TODO: vehicle can take more than one task !
                 if (costToPickup < minCost && task.weight < vehicle.capacity()) {
                     minCost = costToPickup;
                     bestVehicle = vehicle;
                 }
             }
 
-            List<TaskAction> existingVehicleAssignment = taskAssignments.get(bestVehicle);
-            existingVehicleAssignment.add(new TaskAction(task, true));
-            existingVehicleAssignment.add(new TaskAction(task, false));
-
+            taskAssignments.put(
+                    bestVehicle,
+                    taskAssignments.get(bestVehicle).append(task)
+            );
         }
         return new Solution(taskAssignments, vehicles);
     }
@@ -63,7 +60,7 @@ public class Solution {
         double cost = 0;
 
         for (Vehicle vehicle: vehicles) {
-            Plan plan = getPlan(vehicle, taskAssignment.get(vehicle));
+            Plan plan = assignments.get(vehicle).getPlan(vehicle);
             cost += vehicle.costPerKm() * plan.totalDistance();
         }
         return cost;
@@ -73,42 +70,80 @@ public class Solution {
         List<Plan> plans = new ArrayList<>();
 
         for (Vehicle vehicle: vehicles) {
-            plans.add(getPlan(vehicle, taskAssignment.get(vehicle)));
+            plans.add(assignments.get(vehicle).getPlan(vehicle));
         }
         return plans;
     }
 
-    private Plan getPlan(Vehicle vehicle, List<TaskAction> assignment) {
-        City current = vehicle.getCurrentCity();
-        Plan plan = new Plan(current);
-
-        for (TaskAction taskAction: assignment) {
-            City next = taskAction.isPickup() ?
-                    taskAction.getTask().pickupCity :
-                    taskAction.getTask().deliveryCity;
-
-            if (!current.equals(next)) {
-                for (City city : current.pathTo(next)) {
-                    plan.appendMove(city);
-                }
-                current = next;
-            }
-
-            if (taskAction.isPickup()){
-                plan.appendPickup(taskAction.getTask());
-            }
-            else {
-                plan.appendDelivery(taskAction.getTask());
-            }
-
-        }
-        return plan;
-    }
-
     public List<Solution> localNeighbors() {
-        // TODO: Yann
+        List<Solution> solutions = new ArrayList<>();
+
+        // Choose random vehicle with at least one task
+        Vehicle vehicle = null;
+        do {
+            vehicle = vehicles.get(new Random().nextInt(vehicles.size()));
+        } while (assignments.get(vehicle).isEmpty());
+
+        ActionSequence assignment = assignments.get(vehicle);
+
+        // Generate all new solutions from changing its first task with
+        // another vehicle's first task
+        for (Vehicle other: vehicles) {
+            if (other.equals(vehicle)) continue;
+
+            ActionSequence assignmentOther = assignments.get(other);
+            if (assignmentOther.isEmpty()) continue;
+
+            solutions.addAll(
+                    swapFirstTask(assignment, vehicle, assignmentOther, other)
+            );
+        }
+
+        // Generate all solutions by reordering the actions in vehicles
+        // ActionSequence
+        for (ActionSequence newAssignment: assignment.swapTasks()) {
+            Map<Vehicle, ActionSequence> newAssignments =
+                    new HashMap<>(assignments);
+
+            newAssignments.put(vehicle, newAssignment);
+            solutions.add(new Solution(newAssignments, vehicles));
+        }
+
         return null;
     }
 
+    private List<Solution> swapFirstTask(
+            ActionSequence assignmentA, Vehicle vehicleA,
+            ActionSequence assignmentB, Vehicle vehicleB) {
 
+        Task firstTaskA = assignmentA.getFirstTask();
+        Task firstTaskB = assignmentB.getFirstTask();
+
+        List<ActionSequence> insertsA = assignmentA
+                .removeTask(firstTaskA)
+                .insertFirstTask(firstTaskB);
+
+        List<ActionSequence> insertsB = assignmentB
+                .removeTask(firstTaskB)
+                .insertFirstTask(firstTaskA);
+
+        List<Solution> solutions = new LinkedList<>();
+        ListIterator<ActionSequence> iteratorA = insertsA.listIterator();
+
+        while(iteratorA.hasNext()) {
+            List<ActionSequence> insertsBUpwards =
+                    insertsB.subList(iteratorA.nextIndex(), insertsB.size());
+
+            for (ActionSequence sB: insertsBUpwards) {
+
+                Map<Vehicle, ActionSequence> newAssignments =
+                        new HashMap<>(assignments);
+
+                newAssignments.put(vehicleA, iteratorA.next());
+                newAssignments.put(vehicleB, sB);
+                solutions.add(new Solution(newAssignments, vehicles));
+            }
+        }
+        return solutions;
+    }
 }
