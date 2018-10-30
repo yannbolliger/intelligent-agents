@@ -3,8 +3,8 @@ package template;
 import logist.task.Task;
 
 public class TaskAction {
-    Task task;
-    boolean isPickup;
+    private Task task;
+    private boolean isPickup;
 
     public TaskAction(Task task, boolean isPickup) {
         this.task = task;

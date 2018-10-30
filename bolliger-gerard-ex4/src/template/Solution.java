@@ -1,11 +1,9 @@
 package template;
 
-import logist.plan.Action;
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.task.TaskSet;
-import logist.topology.Topology;
 import logist.topology.Topology.City;
 
 import java.util.*;
@@ -13,10 +11,10 @@ import java.util.*;
 public class Solution {
 
 
-    private final Map<Vehicle, List<TaskAction>> taskAssignment;
+    private final Map<Vehicle, LinkedList<TaskAction>> taskAssignment;
     private final List<Vehicle> vehicles;
 
-    private Solution(Map<Vehicle,List<TaskAction>> taskAssignment,
+    private Solution(Map<Vehicle, LinkedList<TaskAction>> taskAssignment,
                      List<Vehicle> vehicles) {
 
         this.taskAssignment = taskAssignment;
@@ -24,29 +22,36 @@ public class Solution {
     }
 
     public static Solution initial(List<Vehicle> vehicles, TaskSet tasks) {
-        Map<Vehicle, List<TaskAction>> taskAssignments = new HashMap();
-        for(Vehicle vehicle: vehicles) {
+        Map<Vehicle, LinkedList<TaskAction>> taskAssignments = new HashMap();
+        for (Vehicle vehicle: vehicles) {
             taskAssignments.put(vehicle, new LinkedList<>());
         }
 
-        for(Task task : tasks){
-            double min_cost = Double.POSITIVE_INFINITY;
-            Vehicle best_vehicle = null;
-            for(Vehicle vehicle: vehicles) {
-                List<TaskAction> existingAssignement =  taskAssignments.get(vehicle);
-                City vehicleNextPosition = vehicle.getCurrentCity();
-                if (!existingAssignement.isEmpty()){
-                    vehicleNextPosition = existingAssignement.get(existingAssignement.size() - 1).task.deliveryCity;
-                }
-                double cost_to_pickup = vehicle.costPerKm() * vehicleNextPosition.distanceTo(task.pickupCity);
+        for (Task task : tasks){
+            double minCost = Double.POSITIVE_INFINITY;
+            Vehicle bestVehicle = null;
 
-                if(cost_to_pickup < min_cost && task.weight < vehicle.capacity()) {
-                    min_cost = cost_to_pickup;
-                    best_vehicle = vehicle;
+            for (Vehicle vehicle: vehicles) {
+                LinkedList<TaskAction> existingAssignment =
+                        taskAssignments.get(vehicle);
+
+                City vehicleNextPosition = vehicle.getCurrentCity();
+                if (!existingAssignment.isEmpty()){
+                    vehicleNextPosition =
+                            existingAssignment.getLast().getTask().deliveryCity;
+                }
+
+                double costToPickup = vehicle.costPerKm()
+                        * vehicleNextPosition.distanceTo(task.pickupCity);
+
+                // TODO: vehicle can take more than one task !
+                if (costToPickup < minCost && task.weight < vehicle.capacity()) {
+                    minCost = costToPickup;
+                    bestVehicle = vehicle;
                 }
             }
 
-            List<TaskAction> existingVehicleAssignment = taskAssignments.get(best_vehicle);
+            List<TaskAction> existingVehicleAssignment = taskAssignments.get(bestVehicle);
             existingVehicleAssignment.add(new TaskAction(task, true));
             existingVehicleAssignment.add(new TaskAction(task, false));
 
@@ -55,38 +60,49 @@ public class Solution {
     }
 
     public double getCost() {
-        // TODO: Yann
-        return 0;
+        double cost = 0;
+
+        for (Vehicle vehicle: vehicles) {
+            Plan plan = getPlan(vehicle, taskAssignment.get(vehicle));
+            cost += vehicle.costPerKm() * plan.totalDistance();
+        }
+        return cost;
     }
 
     public List<Plan> getPlans() {
         List<Plan> plans = new ArrayList<>();
-        for(Vehicle vehicle: vehicles) {
-            List<TaskAction> assignment = taskAssignment.get(vehicle);
-            City current = vehicle.getCurrentCity();
-            Plan plan = new Plan(current);
-            for(TaskAction taskAction: assignment) {
-                City next = taskAction.isPickup ? taskAction.task.pickupCity : taskAction.task.deliveryCity;
 
-                if (current != next) {
-                    for (City city :  current.pathTo(next)) {
-                        plan.appendMove(city);
-                    }
-                    current = next;
-                }
-
-                if (taskAction.isPickup){
-                    plan.appendPickup(taskAction.getTask());
-                }
-                else {
-                    plan.appendDelivery(taskAction.getTask());
-                }
-
-            }
-            plans.add(plan);
-
+        for (Vehicle vehicle: vehicles) {
+            plans.add(getPlan(vehicle, taskAssignment.get(vehicle)));
         }
         return plans;
+    }
+
+    private Plan getPlan(Vehicle vehicle, List<TaskAction> assignment) {
+        City current = vehicle.getCurrentCity();
+        Plan plan = new Plan(current);
+
+        for (TaskAction taskAction: assignment) {
+            City next = taskAction.isPickup() ?
+                    taskAction.getTask().pickupCity :
+                    taskAction.getTask().deliveryCity;
+
+            if (!current.equals(next)) {
+                for (City city : current.pathTo(next)) {
+                    plan.appendMove(city);
+                }
+                current = next;
+            }
+
+            if (taskAction.isPickup()){
+                plan.appendPickup(taskAction.getTask());
+            }
+            else {
+                plan.appendDelivery(taskAction.getTask());
+            }
+
+        }
+        return plan;
     }
 
     public List<Solution> localNeighbors() {
