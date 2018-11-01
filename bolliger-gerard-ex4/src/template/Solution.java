@@ -101,7 +101,7 @@ public class Solution {
 
         // Generate all solutions by reordering the actions in vehicles
         // ActionSequence
-        for (ActionSequence newAssignment: assignment.swapTasks()) {
+        for (ActionSequence newAssignment: assignment.reorderTasks()) {
             Map<Vehicle, ActionSequence> newAssignments =
                     new HashMap<>(assignments);
 

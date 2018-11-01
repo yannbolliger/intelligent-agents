@@ -1,23 +1,23 @@
 package template;
 
-import logist.plan.Action;
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.topology.Topology;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ActionSequence {
 
-    private LinkedList<TaskAction> actions;
+    private final LinkedList<TaskAction> actions;
+    private final Vehicle vehicle;
 
-    public ActionSequence() {
-        this.actions = new LinkedList<>();
+    public ActionSequence(Vehicle vehicle) {
+        this(vehicle, Collections.EMPTY_LIST);
     }
 
-    public ActionSequence(LinkedList<TaskAction> actions) {
+    public ActionSequence(Vehicle vehicle, List<TaskAction> actions) {
+        this.vehicle = vehicle;
         this.actions = new LinkedList<>(actions);
     }
 
@@ -30,7 +30,7 @@ public class ActionSequence {
     }
 
     public ActionSequence append(Task task) {
-        ActionSequence newSeq = new ActionSequence(actions);
+        ActionSequence newSeq = copy();
 
         DeliveryAction delivery = new DeliveryAction(task);
         PickupAction pickup = new PickupAction(task, delivery);
@@ -72,17 +72,41 @@ public class ActionSequence {
     }
 
     public ActionSequence removeTask(Task task) {
-        ActionSequence newSeq = new ActionSequence(actions);
+        ActionSequence newSeq = copy();
 
         newSeq.actions.removeIf(action -> action.getTask().equals(task));
         return newSeq;
     }
 
     public List<ActionSequence> insertFirstTask(Task task) {
+        ActionSequence newSeq = copy();
+
+        DeliveryAction delivery = new DeliveryAction(task);
+        PickupAction pickup = new PickupAction(task, delivery);
+        newSeq.actions.addFirst(pickup);
+
+        List<ActionSequence> newSeqs = new ArrayList<>();
+        ListIterator<TaskAction> iterator = newSeq.actions.listIterator(1);
+
+        int currentWeight = 0;
+        while (iterator.hasNext()) {
+            iterator.add(delivery);
+            newSeqs.add(newSeq.copy());
+
+            iterator.previous();
+            iterator.remove();
+            iterator.next();
+        }
+
+        return newSeqs;
+    }
+
+
+    public List<ActionSequence> reorderTasks() {
         return null;
     }
 
-    public List<ActionSequence> swapTasks() {
-        return null;
+    private ActionSequence copy() {
+        return new ActionSequence(vehicle, actions);
     }
 }
