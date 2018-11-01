@@ -6,7 +6,7 @@
 	<!-- #### CENTRALIZED AGENTS ### -->
 	<agent name="centralized-main">
 		<set class-path="bin/"/>
-		<set class-name="template.CentralizedTemplate"/>
+		<set class-name="template.CentralizedAgent"/>
 	</agent>
 	
 </agents>

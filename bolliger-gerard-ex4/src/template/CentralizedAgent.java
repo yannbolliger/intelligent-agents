@@ -21,7 +21,7 @@ import logist.topology.Topology;
  *
  */
 
-public class CentralizedTemplate implements CentralizedBehavior {
+public class CentralizedAgent implements CentralizedBehavior {
     private static final double P = 0.6;
     private static final long DELTA = 10;
 
