@@ -103,11 +103,9 @@ public class ActionSequence {
 
 
     public ActionSequence insertAt(TaskAction action, int position) {
-
         ActionSequence newSeq = copy();
 
         newSeq.actions.add(position, action);
-
         return newSeq;
     }
 
@@ -117,7 +115,7 @@ public class ActionSequence {
             if (action.isPickup()){
                 vehicleLoad += action.getTask().weight;
             }
-            else{
+            else {
                 vehicleLoad -= action.getTask().weight;
             }
 
@@ -130,24 +128,20 @@ public class ActionSequence {
 
 
     public List<ActionSequence> reorderTasks() {
-
         List<ActionSequence> possibleCombinations = new ArrayList<>();
 
         for (TaskAction action : actions) {
-
             if (action.isPickup()) {
 
+                ActionSequence seqWithoutTask = removeTask(action.getTask());
+                DeliveryAction delivery = new DeliveryAction(action.getTask());
 
-                ActionSequence SeqWithoutTask = removeTask(action.getTask());
+                for (int posPickup = 0; posPickup <= seqWithoutTask.actions.size(); posPickup++) {
 
-                for (int posPickup = 0; posPickup <= SeqWithoutTask.actions.size(); posPickup++) {
+                    ActionSequence seqWithOnlyPickup = seqWithoutTask.insertAt(action, posPickup);
 
-                    ActionSequence SeqWithoutOnlyPickup = SeqWithoutTask.insertAt(action, posPickup);
-
-                    for (int posDelivery = posPickup + 1; posDelivery <= SeqWithoutOnlyPickup.actions.size(); posDelivery++) {
-
-                        DeliveryAction delivery = new DeliveryAction(action.getTask());
-                        ActionSequence reorderedSeq = SeqWithoutTask.insertAt(delivery, posDelivery);
+                    for (int posDelivery = posPickup + 1; posDelivery <= seqWithOnlyPickup.actions.size(); posDelivery++) {
+                        ActionSequence reorderedSeq = seqWithoutTask.insertAt(delivery, posDelivery);
 
                         if (reorderedSeq.checkCapicityIsRespected()) {
                             possibleCombinations.add(reorderedSeq);
