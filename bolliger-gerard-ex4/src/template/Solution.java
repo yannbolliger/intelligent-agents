@@ -76,7 +76,8 @@ public class Solution {
     }
 
     public List<Solution> localNeighbors() {
-        List<Solution> solutions = new LinkedList<>();
+        // always add current solution to neighbors
+        List<Solution> solutions = new LinkedList<>(Arrays.asList(this));
 
         // Choose random vehicle with at least one task
         Vehicle vehicle = null;

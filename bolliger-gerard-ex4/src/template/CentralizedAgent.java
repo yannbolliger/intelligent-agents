@@ -82,7 +82,8 @@ public class CentralizedAgent implements CentralizedBehavior {
         long timeEnd = System.currentTimeMillis();
         long duration = timeEnd - timeStart;
         System.out.println(
-                "The plan was generated in " + duration + " milliseconds with cost: " + solution.getCost()
+                "The plan was generated in " + duration +
+                        " milliseconds with cost: " + solution.getCost()
         );
         return plans;
     }
