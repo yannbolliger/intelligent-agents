@@ -21,6 +21,10 @@ public class ActionSequence {
         this.actions = new LinkedList<>(actions);
     }
 
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
     public boolean isEmpty() {
         return actions.isEmpty();
     }
@@ -77,30 +81,6 @@ public class ActionSequence {
         newSeq.actions.removeIf(action -> action.getTask().equals(task));
         return newSeq;
     }
-
-    public List<ActionSequence> insertFirstTask(Task task) {
-        ActionSequence newSeq = copy();
-
-        DeliveryAction delivery = new DeliveryAction(task);
-        PickupAction pickup = new PickupAction(task, delivery);
-        newSeq.actions.addFirst(pickup);
-
-        List<ActionSequence> newSeqs = new ArrayList<>();
-        ListIterator<TaskAction> iterator = newSeq.actions.listIterator(1);
-
-        int currentWeight = 0;
-        while (iterator.hasNext()) {
-            iterator.add(delivery);
-            newSeqs.add(newSeq.copy());
-
-            iterator.previous();
-            iterator.remove();
-            iterator.next();
-        }
-
-        return newSeqs;
-    }
-
 
     public List<ActionSequence> reorderTasks() {
         return null;

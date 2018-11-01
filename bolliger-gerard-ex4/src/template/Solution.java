@@ -24,7 +24,7 @@ public class Solution {
     public static Solution initial(List<Vehicle> vehicles, TaskSet tasks) {
         Map<Vehicle, ActionSequence> taskAssignments = new HashMap();
         for (Vehicle vehicle: vehicles) {
-            taskAssignments.put(vehicle, new ActionSequence());
+            taskAssignments.put(vehicle, new ActionSequence(vehicle));
         }
 
         for (Task task : tasks){
@@ -86,20 +86,17 @@ public class Solution {
 
         ActionSequence assignment = assignments.get(vehicle);
 
-        // Generate all new solutions from changing its first task with
-        // another vehicle's first task
+        // Generate all new solutions from giving the first task to another
+        // vehicle
         for (Vehicle other: vehicles) {
             if (other.equals(vehicle)) continue;
 
-            ActionSequence assignmentOther = assignments.get(other);
-            if (assignmentOther.isEmpty()) continue;
-
             solutions.addAll(
-                    swapFirstTask(assignment, vehicle, assignmentOther, other)
+                    reassignFirstTask(assignment, assignments.get(other))
             );
         }
 
-        // Generate all solutions by reordering the actions in vehicles
+        // Generate all solutions by reordering the actions in this vehicle's
         // ActionSequence
         for (ActionSequence newAssignment: assignment.reorderTasks()) {
             Map<Vehicle, ActionSequence> newAssignments =
@@ -112,37 +109,26 @@ public class Solution {
         return null;
     }
 
-    private List<Solution> swapFirstTask(
-            ActionSequence assignmentA, Vehicle vehicleA,
-            ActionSequence assignmentB, Vehicle vehicleB) {
+    private List<Solution> reassignFirstTask(
+            ActionSequence assignmentA, ActionSequence assignmentB) {
 
         Task firstTaskA = assignmentA.getFirstTask();
-        Task firstTaskB = assignmentB.getFirstTask();
+        if (firstTaskA.weight > assignmentB.getVehicle().capacity()) {
+            return Collections.EMPTY_LIST;
+        }
 
-        List<ActionSequence> insertsA = assignmentA
-                .removeTask(firstTaskA)
-                .insertFirstTask(firstTaskB);
-
-        List<ActionSequence> insertsB = assignmentB
-                .removeTask(firstTaskB)
-                .insertFirstTask(firstTaskA);
+        ActionSequence removedTaskA = assignmentA.removeTask(firstTaskA);
+        ActionSequence insertsInB = assignmentB.append(firstTaskA);
 
         List<Solution> solutions = new LinkedList<>();
-        ListIterator<ActionSequence> iteratorA = insertsA.listIterator();
+        for (ActionSequence insertInB: insertsInB.reorderTasks()) {
 
-        while(iteratorA.hasNext()) {
-            List<ActionSequence> insertsBUpwards =
-                    insertsB.subList(iteratorA.nextIndex(), insertsB.size());
+            Map<Vehicle, ActionSequence> newAssignments =
+                    new HashMap<>(assignments);
 
-            for (ActionSequence sB: insertsBUpwards) {
-
-                Map<Vehicle, ActionSequence> newAssignments =
-                        new HashMap<>(assignments);
-
-                newAssignments.put(vehicleA, iteratorA.next());
-                newAssignments.put(vehicleB, sB);
-                solutions.add(new Solution(newAssignments, vehicles));
-            }
+            newAssignments.put(removedTaskA.getVehicle(), removedTaskA);
+            newAssignments.put(insertInB.getVehicle(), insertInB);
+            solutions.add(new Solution(newAssignments, vehicles));
         }
         return solutions;
     }
