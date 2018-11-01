@@ -2,7 +2,6 @@ package template;
 
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import logist.LogistSettings;
 
@@ -23,8 +22,8 @@ import logist.topology.Topology;
  */
 
 public class CentralizedAgent implements CentralizedBehavior {
-    private static final double P = 0.3;
-    private static final long DELTA = 100;
+    private static final double P = 0.6;
+    private static final long DELTA = 1000;
 
     private Topology topology;
     private TaskDistribution distribution;
@@ -62,13 +61,11 @@ public class CentralizedAgent implements CentralizedBehavior {
         long timeStart = System.currentTimeMillis();
 
         Solution solution = Solution.initial(vehicles, tasks);
-        List<Solution> neighbors = new LinkedList<>();
+        List<Solution> neighbors = new ArrayList<>();
 
         while (!runningOutOfTime(timeStart)) {
             List<Solution> newNeighbors = solution.localNeighbors();
             neighbors.addAll(newNeighbors);
-
-            System.out.println(neighbors.size());
 
             Solution newSolution = localChoice(neighbors);
 
@@ -83,7 +80,7 @@ public class CentralizedAgent implements CentralizedBehavior {
         long timeEnd = System.currentTimeMillis();
         long duration = timeEnd - timeStart;
         System.out.println(
-                "The plan was generated in " + duration + " milliseconds."
+                "The plan was generated in " + duration + " milliseconds with cost: " + solution.getCost()
         );
         return plans;
     }
@@ -91,11 +88,11 @@ public class CentralizedAgent implements CentralizedBehavior {
     private boolean runningOutOfTime(long timeStart) {
         long elapsedTime = System.currentTimeMillis() - timeStart;
 
-        return elapsedTime >= timeoutPlan - DELTA;
+        return elapsedTime >= timeoutPlan - 2 * DELTA;
     }
 
     private Solution localChoice(List<Solution> solutions) {
-        if (Math.random() > 1 - P) return null;
+        if (Math.random() > P) return null;
 
         double minCost = Double.POSITIVE_INFINITY;
         Solution bestSolution = null;
