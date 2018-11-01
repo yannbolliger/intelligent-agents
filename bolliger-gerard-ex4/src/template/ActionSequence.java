@@ -21,10 +21,6 @@ public class ActionSequence {
         this.actions = new LinkedList<>(actions);
     }
 
-    public Vehicle getVehicle() {
-        return vehicle;
-    }
-
     public boolean isEmpty() {
         return actions.isEmpty();
     }
@@ -82,8 +78,85 @@ public class ActionSequence {
         return newSeq;
     }
 
+    public List<ActionSequence> insertFirstTask(Task task) {
+        ActionSequence newSeq = copy();
+
+        DeliveryAction delivery = new DeliveryAction(task);
+        PickupAction pickup = new PickupAction(task, delivery);
+        newSeq.actions.addFirst(pickup);
+
+        List<ActionSequence> newSeqs = new ArrayList<>();
+        ListIterator<TaskAction> iterator = newSeq.actions.listIterator(1);
+
+        int currentWeight = 0;
+        while (iterator.hasNext()) {
+            iterator.add(delivery);
+            newSeqs.add(newSeq.copy());
+
+            iterator.previous();
+            iterator.remove();
+            iterator.next();
+        }
+
+        return newSeqs;
+    }
+
+
+    public ActionSequence insertAt(TaskAction action, int position) {
+
+        ActionSequence newSeq = copy();
+
+        newSeq.actions.add(position, action);
+
+        return newSeq;
+    }
+
+    public boolean checkCapicityIsRespected() {
+        int vehicleLoad = 0;
+        for (TaskAction action : actions) {
+            if (action.isPickup()){
+                vehicleLoad += action.getTask().weight;
+            }
+            else{
+                vehicleLoad -= action.getTask().weight;
+            }
+
+            if (vehicleLoad > vehicle.capacity()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     public List<ActionSequence> reorderTasks() {
-        return null;
+
+        List<ActionSequence> possibleCombinations = new ArrayList<>();
+
+        for (TaskAction action : actions) {
+
+            if (action.isPickup()) {
+
+
+                ActionSequence SeqWithoutTask = removeTask(action.getTask());
+
+                for (int posPickup = 0; posPickup <= SeqWithoutTask.actions.size(); posPickup++) {
+
+                    ActionSequence SeqWithoutOnlyPickup = SeqWithoutTask.insertAt(action, posPickup);
+
+                    for (int posDelivery = posPickup + 1; posDelivery <= SeqWithoutOnlyPickup.actions.size(); posDelivery++) {
+
+                        DeliveryAction delivery = new DeliveryAction(action.getTask());
+                        ActionSequence reorderedSeq = SeqWithoutTask.insertAt(delivery, posDelivery);
+
+                        if (reorderedSeq.checkCapicityIsRespected()) {
+                            possibleCombinations.add(reorderedSeq);
+                        }
+                    }
+                }
+            }
+        }
+        return possibleCombinations;
     }
 
     private ActionSequence copy() {
