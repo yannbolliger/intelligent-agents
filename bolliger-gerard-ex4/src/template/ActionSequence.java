@@ -7,13 +7,13 @@ import logist.topology.Topology;
 
 import java.util.*;
 
-public class ActionSequence {
+class ActionSequence {
 
     private final LinkedList<TaskAction> actions;
     private final Vehicle vehicle;
 
     public ActionSequence(Vehicle vehicle) {
-        this(vehicle, Collections.EMPTY_LIST);
+        this(vehicle, new LinkedList<>());
     }
 
     public ActionSequence(Vehicle vehicle, List<TaskAction> actions) {
@@ -33,7 +33,7 @@ public class ActionSequence {
         ActionSequence newSeq = copy();
 
         DeliveryAction delivery = new DeliveryAction(task);
-        PickupAction pickup = new PickupAction(task, delivery);
+        PickupAction pickup = new PickupAction(task);
         newSeq.actions.add(pickup);
         newSeq.actions.add(delivery);
 
@@ -78,30 +78,6 @@ public class ActionSequence {
         return newSeq;
     }
 
-    public List<ActionSequence> insertFirstTask(Task task) {
-        ActionSequence newSeq = copy();
-
-        DeliveryAction delivery = new DeliveryAction(task);
-        PickupAction pickup = new PickupAction(task, delivery);
-        newSeq.actions.addFirst(pickup);
-
-        List<ActionSequence> newSeqs = new ArrayList<>();
-        ListIterator<TaskAction> iterator = newSeq.actions.listIterator(1);
-
-        int currentWeight = 0;
-        while (iterator.hasNext()) {
-            iterator.add(delivery);
-            newSeqs.add(newSeq.copy());
-
-            iterator.previous();
-            iterator.remove();
-            iterator.next();
-        }
-
-        return newSeqs;
-    }
-
-
     public ActionSequence insertAt(TaskAction action, int position) {
         ActionSequence newSeq = copy();
 
@@ -128,7 +104,7 @@ public class ActionSequence {
 
 
     public List<ActionSequence> reorderTasks() {
-        List<ActionSequence> possibleCombinations = new ArrayList<>();
+        List<ActionSequence> possibleCombinations = new LinkedList<>();
 
         for (TaskAction action : actions) {
             if (action.isPickup()) {
@@ -141,7 +117,8 @@ public class ActionSequence {
                     ActionSequence seqWithOnlyPickup = seqWithoutTask.insertAt(action, posPickup);
 
                     for (int posDelivery = posPickup + 1; posDelivery <= seqWithOnlyPickup.actions.size(); posDelivery++) {
-                        ActionSequence reorderedSeq = seqWithoutTask.insertAt(delivery, posDelivery);
+                        ActionSequence reorderedSeq =
+                                seqWithOnlyPickup.insertAt(delivery, posDelivery);
 
                         if (reorderedSeq.checkCapicityIsRespected()) {
                             possibleCombinations.add(reorderedSeq);

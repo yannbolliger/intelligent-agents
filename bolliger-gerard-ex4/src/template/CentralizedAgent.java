@@ -2,6 +2,7 @@ package template;
 
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import logist.LogistSettings;
 
@@ -22,8 +23,8 @@ import logist.topology.Topology;
  */
 
 public class CentralizedAgent implements CentralizedBehavior {
-    private static final double P = 0.6;
-    private static final long DELTA = 10;
+    private static final double P = 0.3;
+    private static final long DELTA = 100;
 
     private Topology topology;
     private TaskDistribution distribution;
@@ -61,11 +62,13 @@ public class CentralizedAgent implements CentralizedBehavior {
         long timeStart = System.currentTimeMillis();
 
         Solution solution = Solution.initial(vehicles, tasks);
-        List<Solution> neighbors = new ArrayList<>();
+        List<Solution> neighbors = new LinkedList<>();
 
         while (!runningOutOfTime(timeStart)) {
             List<Solution> newNeighbors = solution.localNeighbors();
             neighbors.addAll(newNeighbors);
+
+            System.out.println(neighbors.size());
 
             Solution newSolution = localChoice(neighbors);
 
@@ -88,11 +91,11 @@ public class CentralizedAgent implements CentralizedBehavior {
     private boolean runningOutOfTime(long timeStart) {
         long elapsedTime = System.currentTimeMillis() - timeStart;
 
-        return elapsedTime >= timeoutPlan - 2 * DELTA;
+        return elapsedTime >= timeoutPlan - DELTA;
     }
 
     private Solution localChoice(List<Solution> solutions) {
-        if (Math.random() > P) return null;
+        if (Math.random() > 1 - P) return null;
 
         double minCost = Double.POSITIVE_INFINITY;
         Solution bestSolution = null;

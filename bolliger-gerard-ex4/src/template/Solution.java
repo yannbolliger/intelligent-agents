@@ -76,7 +76,7 @@ public class Solution {
     }
 
     public List<Solution> localNeighbors() {
-        List<Solution> solutions = new ArrayList<>();
+        List<Solution> solutions = new LinkedList<>();
 
         // Choose random vehicle with at least one task
         Vehicle vehicle = null;
@@ -106,7 +106,7 @@ public class Solution {
             solutions.add(new Solution(newAssignments, vehicles));
         }
 
-        return null;
+        return solutions;
     }
 
     private List<Solution> reassignFirstTask(
