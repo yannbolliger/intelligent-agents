@@ -67,8 +67,8 @@ class ActionSequence {
         return plan;
     }
 
-    public Task getFirstTask() {
-        return actions.getFirst().getTask();
+    public Task getRandomTask() {
+        return actions.get(new Random().nextInt(actions.size())).getTask();
     }
 
     public ActionSequence removeTask(Task task) {

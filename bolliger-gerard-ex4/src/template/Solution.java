@@ -113,7 +113,7 @@ public class Solution {
     private List<Solution> reassignFirstTask(
             ActionSequence assignmentA, ActionSequence assignmentB) {
 
-        Task firstTaskA = assignmentA.getFirstTask();
+        Task firstTaskA = assignmentA.getRandomTask();
         if (firstTaskA.weight > assignmentB.getVehicle().capacity()) {
             return Collections.EMPTY_LIST;
         }
