@@ -9,10 +9,11 @@ import logist.topology.Topology.City;
 import java.util.*;
 
 public class Solution {
-
+    private final static double COST_NOT_CACHED = -1;
 
     private final Map<Vehicle, ActionSequence> assignments;
     private final List<Vehicle> vehicles;
+    private double cost = COST_NOT_CACHED;
 
     private Solution(Map<Vehicle, ActionSequence> taskAssignment,
                      List<Vehicle> vehicles) {
@@ -57,12 +58,14 @@ public class Solution {
     }
 
     public double getCost() {
-        double cost = 0;
+        if (cost == COST_NOT_CACHED) {
+            cost = 0;
 
-        for (Vehicle vehicle: vehicles) {
-            cost += vehicle.costPerKm() * assignments.get(vehicle).getDistance();
+            for (Vehicle vehicle : vehicles) {
+                cost += vehicle.costPerKm() * assignments.get(vehicle).getDistance();
+            }
         }
-        return cost;
+        return this.cost;
     }
 
     public List<Plan> getPlans() {

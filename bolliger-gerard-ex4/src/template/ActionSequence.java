@@ -8,9 +8,11 @@ import logist.topology.Topology;
 import java.util.*;
 
 class ActionSequence {
+    private final static double DISTANCE_NOT_CACHED = -1;
 
     private final LinkedList<TaskAction> actions;
     private final Vehicle vehicle;
+    private double distance = DISTANCE_NOT_CACHED;
 
     public ActionSequence(Vehicle vehicle) {
         this(vehicle, new LinkedList<>());
@@ -41,17 +43,19 @@ class ActionSequence {
     }
 
     public double getDistance() {
-        double distance = 0;
-        Topology.City current = vehicle.getCurrentCity();
+        if (distance == DISTANCE_NOT_CACHED) {
+            distance = 0;
+            Topology.City current = vehicle.getCurrentCity();
 
-        for (TaskAction taskAction: actions) {
-            Topology.City next = taskAction.isPickup() ?
-                    taskAction.getTask().pickupCity :
-                    taskAction.getTask().deliveryCity;
+            for (TaskAction taskAction : actions) {
+                Topology.City next = taskAction.isPickup() ?
+                        taskAction.getTask().pickupCity :
+                        taskAction.getTask().deliveryCity;
 
-            if (!current.equals(next)) {
-                distance += current.distanceTo(next);
-                current = next;
+                if (!current.equals(next)) {
+                    distance += current.distanceTo(next);
+                    current = next;
+                }
             }
         }
         return distance;
