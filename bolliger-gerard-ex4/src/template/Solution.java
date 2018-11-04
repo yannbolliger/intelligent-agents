@@ -60,8 +60,7 @@ public class Solution {
         double cost = 0;
 
         for (Vehicle vehicle: vehicles) {
-            Plan plan = assignments.get(vehicle).getPlan(vehicle);
-            cost += vehicle.costPerKm() * plan.totalDistance();
+            cost += vehicle.costPerKm() * assignments.get(vehicle).getDistance();
         }
         return cost;
     }

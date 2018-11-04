@@ -40,6 +40,23 @@ class ActionSequence {
         return newSeq;
     }
 
+    public double getDistance() {
+        double distance = 0;
+        Topology.City current = vehicle.getCurrentCity();
+
+        for (TaskAction taskAction: actions) {
+            Topology.City next = taskAction.isPickup() ?
+                    taskAction.getTask().pickupCity :
+                    taskAction.getTask().deliveryCity;
+
+            if (!current.equals(next)) {
+                distance += current.distanceTo(next);
+                current = next;
+            }
+        }
+        return distance;
+    }
+
     public Plan getPlan(Vehicle vehicle) {
         Topology.City current = vehicle.getCurrentCity();
         Plan plan = new Plan(current);
@@ -85,7 +102,7 @@ class ActionSequence {
         return newSeq;
     }
 
-    public boolean checkCapicityIsRespected() {
+    public boolean checkCapacityIsRespected() {
         int vehicleLoad = 0;
         for (TaskAction action : actions) {
             if (action.isPickup()){
@@ -112,15 +129,20 @@ class ActionSequence {
                 ActionSequence seqWithoutTask = removeTask(action.getTask());
                 DeliveryAction delivery = new DeliveryAction(action.getTask());
 
-                for (int posPickup = 0; posPickup <= seqWithoutTask.actions.size(); posPickup++) {
+                for (int posPickup = 0;
+                     posPickup <= seqWithoutTask.actions.size(); posPickup++) {
 
-                    ActionSequence seqWithOnlyPickup = seqWithoutTask.insertAt(action, posPickup);
+                    ActionSequence seqWithOnlyPickup =
+                            seqWithoutTask.insertAt(action, posPickup);
 
-                    for (int posDelivery = posPickup + 1; posDelivery <= seqWithOnlyPickup.actions.size(); posDelivery++) {
+                    for (int posDelivery = posPickup + 1;
+                         posDelivery <= seqWithOnlyPickup.actions.size();
+                         posDelivery++) {
+
                         ActionSequence reorderedSeq =
                                 seqWithOnlyPickup.insertAt(delivery, posDelivery);
 
-                        if (reorderedSeq.checkCapicityIsRespected()) {
+                        if (reorderedSeq.checkCapacityIsRespected()) {
                             possibleCombinations.add(reorderedSeq);
                         }
                     }
