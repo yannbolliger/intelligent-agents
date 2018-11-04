@@ -1,9 +1,8 @@
 package template;
 
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+
 import logist.LogistSettings;
 
 import logist.behavior.CentralizedBehavior;
@@ -62,28 +61,37 @@ public class CentralizedAgent implements CentralizedBehavior {
     public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
         long timeStart = System.currentTimeMillis();
 
-        Solution solution = Solution.initial(vehicles, tasks);
+        Solution nextSolution = Solution.initial(vehicles, tasks);
+        Solution bestSolution = nextSolution;
         List<Solution> neighbors = new LinkedList<>();
+        Set<Solution> formerSolutions = new HashSet<>();
+        formerSolutions.add(bestSolution);
 
         while (!runningOutOfTime(timeStart)) {
-            List<Solution> newNeighbors = solution.localNeighbors();
+            List<Solution> newNeighbors = nextSolution.localNeighbors();
             neighbors.addAll(newNeighbors);
+            neighbors.removeAll(formerSolutions);
 
             Solution newSolution = localChoice(neighbors);
 
             if (newSolution != null) {
-                solution = newSolution;
-                neighbors = new ArrayList<>();
+                formerSolutions.add(newSolution);
+                nextSolution = newSolution;
+                neighbors = new LinkedList<>();
+
+                if (nextSolution.getCost() < bestSolution.getCost()) {
+                    bestSolution = nextSolution;
+                }
             }
         }
-        List<Plan> plans = solution.getPlans();
+        List<Plan> plans = bestSolution.getPlans();
 
         // log used time
         long timeEnd = System.currentTimeMillis();
         long duration = timeEnd - timeStart;
         System.out.println(
                 "The plan was generated in " + duration +
-                        " milliseconds with cost: " + solution.getCost()
+                        " milliseconds with cost: " + bestSolution.getCost()
         );
         return plans;
     }

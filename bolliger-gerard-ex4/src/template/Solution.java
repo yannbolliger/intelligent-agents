@@ -107,7 +107,6 @@ public class Solution {
             newAssignments.put(vehicle, newAssignment);
             solutions.add(new Solution(newAssignments, vehicles));
         }
-
         return solutions;
     }
 
@@ -133,5 +132,19 @@ public class Solution {
             solutions.add(new Solution(newAssignments, vehicles));
         }
         return solutions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Solution)) return false;
+        Solution solution = (Solution) o;
+        return Objects.equals(assignments, solution.assignments) &&
+                Objects.equals(vehicles, solution.vehicles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(assignments, vehicles);
     }
 }

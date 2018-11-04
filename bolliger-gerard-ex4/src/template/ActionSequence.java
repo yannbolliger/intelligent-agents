@@ -159,4 +159,31 @@ class ActionSequence {
     private ActionSequence copy() {
         return new ActionSequence(vehicle, actions);
     }
+
+    @Override
+    /**
+     * Returns true if the other object is also a ActionSequence and represents
+     * essentially the same sequence. This is compared by the total distance
+     * that the vehicle has to drive for this sequence. In that manner we
+     * avoid to consider two sequences where only two pickups in the same city
+     * change order but yield the same cost as two different sequences.
+     *
+     * This is important in order to avoid being stuck in local minima with
+     * the local stochastic search.
+     */
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ActionSequence)) return false;
+        ActionSequence that = (ActionSequence) o;
+
+        // compare distance and vehicle (not actual sequence)
+        return Objects.equals(getDistance(), that.getDistance()) &&
+                Objects.equals(vehicle, that.vehicle);
+    }
+
+    @Override
+    public int hashCode() {
+        // compare distance and vehicle (not actual sequence)
+        return Objects.hash(getDistance(), vehicle);
+    }
 }
