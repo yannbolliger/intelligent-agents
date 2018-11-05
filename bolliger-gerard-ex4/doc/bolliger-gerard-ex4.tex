@@ -1,6 +1,7 @@
 \documentclass[11pt]{article}
 
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{textcomp}
 \usepackage[top=0.8in, bottom=0.8in, left=0.8in, right=0.8in]{geometry}
 % Add other packages here %
@@ -59,7 +60,7 @@ $$
 vehicle(a) \in \mathcal{V};
 \;\;
 \forall a \in \mathcal{A}  :
-time(a) \in \{0, 1, 2, ...\}
+time(a) \in \mathbb{N}
 $$
 
 The $vehicle$ variables define which vehicle carries out a certain action.
@@ -74,7 +75,58 @@ in the chain (for example if
 $firstPickup(v) = a, nextAction(a) = b$ then $time(a) = 1$, $time(b) = 2$).
 
 \subsection{Constraints}
-% Describe the constraints in your solution representation %
+As explained before, the action chain for each vehicle define the $time$ 
+and the $vehicle$ for each action:
+
+$$
+firstPickup(v) = a \Rightarrow time(a) = 1; \;\;
+nextAction(b) = c \Rightarrow time(c) = time(b) + 1
+$$
+$$
+firstPickup(v) = a \Rightarrow vehicle(a) = v; \;\;
+nextAction(b) = c \Rightarrow vehicle(c) = vehicle(b)
+$$
+
+Additionally, the same vehicle must $pickup$ and $deliver$ a task. 
+It has to pickup the task before it delivers it, of course, 
+and \textbf{each task must be picked up and delivered}:
+$$
+\forall a \in \mathcal{A}  :
+nextAction(a) \neq a, \,
+nextAction(a) = \mathtt{null} \Rightarrow a \in \mathcal{D}
+$$
+$$
+\forall t \in \mathcal{T}: 
+vehicle(pickup(t)) = vehicle(delivery(t)) \in \mathcal{V}
+$$
+$$
+\forall t \in \mathcal{T}: 
+time(pickup(t)) < time(delivery(t))
+$$
+$$
+\forall t \in \mathcal{T} \; 
+\exists  \, \{ pickup(t), delivery(t) \} \subset \mathcal{A} \;\;
+\text{and} \;\;
+\forall a \in \mathcal{A} \;
+\exists \, v \in \mathcal{V} : 
+vehicle(a) = v
+$$
+
+Last but not least, at each time $\tau$ a vehicle $v$ can never 
+carry more weight than its capacity.
+$$
+carriedTasks(\tau, v) = \{t \in \mathcal{T}: 
+vehicle(pickup(t)) = v \wedge 
+time(pickup(t)) < \tau \wedge 
+time(delivery(t)) > \tau \};
+$$
+$$
+\forall \tau \in \mathbb{N}:
+\sum_{t \, \in \, carriedTasks(\tau, v)} weight(t) \leq
+capacity(v)
+$$
+
+
 
 \subsection{Objective function}
 % Describe the function that you optimize %
@@ -98,22 +150,28 @@ $firstPickup(v) = a, nextAction(a) = b$ then $time(a) = 1$, $time(b) = 2$).
 % if your model has parameters, perform an experiment and 
 % analyze the results for different parameter values %
 
-\subsubsection{Setting}
-% Describe the settings of your experiment: topology, task configuration, number of tasks, number of vehicles, etc. %
+\subsubsection{Setting} 
+% Describe the settings of your experiment: topology,
+% task configuration, number of tasks, number of vehicles, etc. % 
 % and the parameters you are analyzing %
 
 \subsubsection{Observations}
-% Describe the experimental results and the conclusions you inferred from these results %
+% Describe the experimental results and the conclusions you inferred 
+% from these results %
 
 \subsection{Experiment 2: Different configurations}
-% Run simulations for different configurations of the environment (i.e. different tasks and number of vehicles) %
+% Run simulations for different configurations of the environment 
+% (i.e. different tasks and number of vehicles) %
 
 \subsubsection{Setting}
-% Describe the settings of your experiment: topology, task configuration, number of tasks, number of vehicles, etc. %
+% Describe the settings of your experiment: topology, task 
+% configuration, number of tasks, number of vehicles, etc. %
 
 \subsubsection{Observations}
-% Describe the experimental results and the conclusions you inferred from these results %
-% Reflect on the fairness of the optimal plans. Observe that optimality requires some vehicles to do more work than others. %
-% How does the complexity of your algorithm depend on the number of vehicles and various sizes of the task set? %
+% Describe the experimental results and the conclusions you inferred 
+% from these results. Reflect on the fairness of the optimal plans. 
+% Observe that optimality requires some vehicles to do more work 
+% than others. How does the complexity of your algorithm depend on the 
+% number of vehicles and various sizes of the task set? %
 
 \end{document}
