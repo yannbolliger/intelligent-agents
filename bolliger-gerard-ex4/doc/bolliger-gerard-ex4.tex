@@ -185,8 +185,17 @@ capacity and the $p$ before $d$ constraint.
 
 \subsection{Stochastic optimization algorithm}
 
-Local search blabla
+As proposed in the paper \cite{paper} we use stochastic local search to find 
+a better solution than the initial one. Thereby we generate neighbors at each 
+iteration and with probability $p$, we take the least costly neighbor as a new 
+solution.
 
+The critical addition we made to the algorithm avoids getting stuck in local 
+minima. In fact, each time a new solution is chosen, we also add this solution 
+to a set called \texttt{formerSolutions}. The algorithm is not allowed to 
+subsequently choose a solution with the same cost as one that is already in the 
+set. Therefore it has to keep exploring new solutions with new and possibly 
+lower cost. At the end the overall minimum that was ever visited is returned.
 
 
 \section{Results}
@@ -218,5 +227,16 @@ Local search blabla
 % Observe that optimality requires some vehicles to do more work 
 % than others. How does the complexity of your algorithm depend on the 
 % number of vehicles and various sizes of the task set? %
+
+
+
+\begin{thebibliography}{1}
+
+\bibitem{paper} Radu Jurca, Nguyen Quang Huy and Michael
+Schumacher {\em Finding the Optimal Delivery Plan: Model as a
+Constraint Satisfaction Problem} 2006-2007: Intelligent Agents course
+\end{thebibliography}
+
+
 
 \end{document}
