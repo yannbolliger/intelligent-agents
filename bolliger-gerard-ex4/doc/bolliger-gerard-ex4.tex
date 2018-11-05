@@ -8,7 +8,7 @@
 
 % Put your group number and names in the author field %
 \title{\bf Excercise 4\\ Implementing a centralized agent}
-\author{Group \textnumero : Student 1, Student 2}
+\author{Group \textnumero : 90  Kyle Gerard, Yann Bolliger}
 
 
 % N.B.: The report should not be longer than 3 pages %
@@ -19,8 +19,59 @@
 
 \section{Solution Representation}
 
-\subsection{Variables}
-% Describe the variables used in your solution representation %
+\subsection{Variables} 
+
+Instead of representing a vehicle's journey as a sequence of tasks, we chose to
+represent it as a sequence of $pickup$ and $delivery$ actions. Each task 
+$t \in \mathcal{T}$
+has one action of both types.
+
+$$
+\mathcal{P} = \{pickup(t) : t \in \mathcal{T}\} , \;  
+\mathcal{D} = \{delivery(t) : t \in \mathcal{T}\} , \; 
+\mathcal{A} =  \mathcal{P} \cup \mathcal{D}
+$$
+
+This accounts for the fact that a vehicle can carry multiple tasks at a time if
+there are two pickups in a row. The following variables define the 
+first pickup of each vehicle (where $\mathcal{V}$ is the set vehicles). 
+
+$$
+\forall v \in \mathcal{V}  : \;
+firstPickup(v)  \in \mathcal{P} \cup \{\mathtt{null}\} 
+$$
+
+If the variable is $\mathtt{null}$ this means the vehicle does not accomplish
+any actions. All subsequent actions of a vehicle are defined by the next set of
+variables:
+
+$$
+\forall a \in \mathcal{A}  : \;
+nextAction(a) \in \mathcal{A}  \cup \{\mathtt{null}\} 
+$$
+
+where again the $\mathtt{null}$ signifies that a vehicle has no further actions
+to perform. We will define two other sets of variables which will clarify the
+former:
+
+$$
+\forall a \in \mathcal{A}  :
+vehicle(a) \in \mathcal{V};
+\;\;
+\forall a \in \mathcal{A}  :
+time(a) \in \{0, 1, 2, ...\}
+$$
+
+The $vehicle$ variables define which vehicle carries out a certain action.
+This can be derived from the $firstPickup$ action at the start of
+each action chain defined by $nextAction$. (For example if
+$firstPickup(v) = a, nextAction(a) = b$ then 
+$vehicle(a) = vehicle(b) = v$.)
+
+The second variable can also be 
+derived from the action chains. It simply gives the rank of each action
+in the chain (for example if 
+$firstPickup(v) = a, nextAction(a) = b$ then $time(a) = 1$, $time(b) = 2$).
 
 \subsection{Constraints}
 % Describe the constraints in your solution representation %
@@ -44,7 +95,8 @@
 \section{Results}
 
 \subsection{Experiment 1: Model parameters}
-% if your model has parameters, perform an experiment and analyze the results for different parameter values %
+% if your model has parameters, perform an experiment and 
+% analyze the results for different parameter values %
 
 \subsubsection{Setting}
 % Describe the settings of your experiment: topology, task configuration, number of tasks, number of vehicles, etc. %
