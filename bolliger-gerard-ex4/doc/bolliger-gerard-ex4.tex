@@ -43,7 +43,11 @@ firstPickup(v)  \in \mathcal{P} \cup \{\mathtt{null}\}
 $$
 
 If the variable is $\mathtt{null}$ this means the vehicle does not accomplish
-any actions. All subsequent actions of a vehicle are defined by the next set of
+any actions. In that manner a vehicle goes from its starting point to the 
+location of the first pickup and then it always goes to the associated city of 
+the next task it has to perform. All journeys are made on the shortest possible 
+path.
+All subsequent actions of a vehicle are defined by the next set of
 variables:
 
 $$
@@ -128,11 +132,24 @@ $$
 
 
 
-\subsection{Objective function}
-The goal of the company/agent is to maximise the reward. Because all tasks 
-have to be delivered, all rewards will be earned and the overall reward
-sum is therefore constant. Thus the objective function we want to minimise 
-is the cost of the overall assignment $\mathcal{S}$.
+\subsection{Objective function} 
+
+The goal of the company is to maximise the reward. Because all tasks have to be
+delivered, all rewards will be earned and the overall reward is constant. Thus
+the objective function we want to minimise is the cost of the overall assignment
+$\mathcal{S}$. We define $dist(a,b)$ to be the shortest distance between the
+associated cities of actions $a,b \in \mathcal{A}$, $dist(a, \mathtt{null}) =
+0$, $start(v)$ is the initial postion and $cost(v)$ the cost per kilometre of
+vehicle $v$.
+
+$$
+cost(\mathcal{S}) = 
+\sum_{v \in \mathcal{V}} dist(start(v), firstPickup(v))
+\cdot cost(v)
+ +
+\sum_{a \in \mathcal{A}} dist(a, nextAction(a))
+\cdot cost(vehicle(a))
+$$
 
 
 \section{Stochastic optimization}
