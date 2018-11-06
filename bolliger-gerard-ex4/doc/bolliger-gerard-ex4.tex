@@ -174,13 +174,15 @@
  neighbors at each iteration and with probability $p$, we take the least costly
  neighbor as a new solution.
 
- The critical addition we made to the algorithm avoids getting stuck in local
- minima. In fact, each time a new solution is chosen, we also add this solution
- to a set called \texttt{formerSolutions}. The algorithm is not allowed to
- subsequently choose a solution with the \textbf{same cost} as one that is
- already in the set. Therefore it has to keep exploring new solutions with new
- and possibly lower cost. At the end the overall minimum that was ever visited is
- returned.
+ We made a critical addition to the algorithm that avoids getting stuck in local
+ minima. In fact, if there are two pickups at the same location, this yields two
+ solutions depending on the order of the pickups. However, the solutions are
+ completely equivalent in terms of cost. Therfore, each time a new solution is
+ chosen, we add this solution to a set called \texttt{formerSolutions}. In
+ addition, the algorithm is not allowed to subsequently choose a solution with
+ the \textbf{same cost} as one that is already in the set. In that manner it has
+ to keep exploring new solutions with new and possibly lower cost. At the end
+ the overall minimum that was ever visited is returned.
 
 
  \section{Results}
@@ -193,14 +195,28 @@
  % Describe the settings of your experiment: topology,
  % task configuration, number of tasks, number of vehicles, etc. %
  % and the parameters you are analyzing %
- Default config given in handout (30 tasks, 4 cars). Probability p between 0 and 0.9
- \subsubsection{Observations}
- % Describe the experimental results and the conclusions you inferred
- % from these results %
- \begin{wrapfigure}{R}{0.45\textwidth}
-  \includegraphics[width=10cm]{convergence.png}
- \end{wrapfigure}
- As we can see in the graph on the right, a higher probability $p$ value takes more time to converge towards an optimal solution than lower $p$ values. This makes sense as with a high probability $p$ it is likely that more solutions are generated at every iteration of the algorithm. Other than the time to converge to a good solution, the cost of the final solution itself ( given enough time) does not seem to depend on the probability $p$ value. Indeed, after 3 minutes, all plans cost between 10,000 and 13,000 which is a relatively small range.
+ Default configuration given in handout (30 tasks, 4 cars). Probability $p$
+ between 0 and 0.9 
+ 
+ \subsubsection{Observations} 
+ % Describe the experimental results and the
+ % conclusions you inferred from these results %
+ 
+ \begin{wrapfigure}{R}{0.55\textwidth}
+    \vspace{-20pt}
+ \includegraphics[width=0.55\textwidth]{convergence.png} 
+   \vspace{-20pt}
+ \end{wrapfigure} 
+ 
+ As we can see in the graph on the right, a higher probability $p$ value takes
+ more time to converge towards an optimal solution than lower $p$ values. This
+ makes sense because with a high probability $p$ it is likely that the algorithm
+ choose a new solution more often. Thus more solutions are generated. 
+ 
+ Other than the time to converge to a good solution, the cost of the final
+ solution itself (given enough time) does not seem to depend on the probability
+ $p$. Indeed, after 3 minutes, all plans cost between 10,000 and 13,000 which is
+ a relatively small range.
 
 
 
@@ -211,7 +227,7 @@
  \subsubsection{Setting}
  % Describe the settings of your experiment: topology, task
  % configuration, number of tasks, number of vehicles, etc. %
- Default config with tasks from 1 to 40 and number of cars from 1 to 4.
+ Default configuration with tasks from 1 to 40 and number of cars from 1 to 4.
 
  \subsubsection{Observations}
  % Describe the experimental results and the conclusions you inferred
@@ -219,11 +235,33 @@
  % Observe that optimality requires some vehicles to do more work
  % than others. How does the complexity of your algorithm depend on the
  % number of vehicles and various sizes of the task set? %
- Changing the number of cars has very little influence on the cost of a plan. Indeed, with 1 car (and 30 tasks) we were able to find a Plan with a cost of 12451 and with 4 cars we found a Plan with a cost of 11703. The reason for this small difference in cost is that in the optimal solution (score 11703) with 4 cars only 1 cars is actually delivering tasks. The reason for this is because there is no notion of time to deliver all tasks, only the distance travelled is relevant. It is therefore normal that you can obtain similar results using only one car and that plans with multiple cars are unfair (some drivers will not deliver any tasks).
+ 
+ Changing the number of cars has very little influence on the cost of a plan.
+ Indeed, with one car (and 30 tasks) we were able to find a plan with a cost of
+ 12'451 and with four cars we found a plan with a cost of 11'703. The reason for
+ this small difference in cost is that in the better solution with four cars
+ only one car is actually delivering tasks. This is because there is no notion
+ of time efficiency to deliver all tasks, only the distance travelled is
+ relevant. It is therefore normal that you can obtain similar results using only
+ one car and that plans with multiple cars are unfair (some drivers will not
+ deliver any tasks).
+\\
 
  \begin{wrapfigure}{L}{0.5\textwidth}
-  \includegraphics[width=8cm]{iterations.png}
+  \includegraphics[width=0.5\textwidth]{iterations.png}
+   \vspace{-20pt}
  \end{wrapfigure}
- In the graph on the left we see that the complexity of the algorithm increases with the number of tasks. This is to be expected as in every iteration of the algo we calculate the possible neighbors as explained in part 2.2. Finding all possible combinations of pickups and deliveries of a Plan takes time O($numberOfTasksInPlan^3$). The complexity of our algorithm is however not dependant on the number of vehicles as tasks are not evenly spread out between cars (most cars take constant time O($numberOfTasksInPlan^3 = 1^3 = 1$) per iteration as no tasks are given to them) .
+ 
+ 
+ In the graph on the left we see that the complexity of the algorithm increases
+ with the number of tasks. This is to be expected as in every iteration of the
+ algorithm we calculate the possible neighbors as explained in part 2.2. Finding
+ all possible combinations of pickups and deliveries of a plan takes time
+ $\mathcal{O}(n^3)$, where $n$ is the number of tasks in the plan. 
+ 
+ The complexity of our algorithm is however not dependent on the number of
+ vehicles because tasks are not evenly distributed between cars (most cars take
+ constant time $\mathcal{O}(n^3) = \mathcal{O}(1)$ per iteration as no tasks are
+ given to them $n=0$).
 
 \end{document}
