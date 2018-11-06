@@ -22,7 +22,7 @@ import logist.topology.Topology;
  */
 
 public class CentralizedAgent implements CentralizedBehavior {
-    private static final double P = 0.3;
+    private static final double P = 0.4;
     private static final long DELTA = 3_000;
     private static final int MAX_NEIGHBORS_SIZE = 250_000;
 
