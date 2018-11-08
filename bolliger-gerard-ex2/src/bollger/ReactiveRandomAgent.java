@@ -1,16 +1,19 @@
-package template;
-
-import logist.agent.Agent;
-import logist.behavior.ReactiveBehavior;
-import logist.plan.Action;
-import logist.simulation.Vehicle;
-import logist.task.Task;
-import logist.task.TaskDistribution;
-import logist.topology.Topology;
+package bollger;
 
 import java.util.Random;
 
-public class ReactiveDummyAgent implements ReactiveBehavior {
+import logist.simulation.Vehicle;
+import logist.agent.Agent;
+import logist.behavior.ReactiveBehavior;
+import logist.plan.Action;
+import logist.plan.Action.Move;
+import logist.plan.Action.Pickup;
+import logist.task.Task;
+import logist.task.TaskDistribution;
+import logist.topology.Topology;
+import logist.topology.Topology.City;
+
+public class ReactiveRandomAgent implements ReactiveBehavior {
 
     private Random random;
     private double pPickup;
@@ -35,20 +38,11 @@ public class ReactiveDummyAgent implements ReactiveBehavior {
     public Action act(Vehicle vehicle, Task availableTask) {
         Action action;
 
-        if (availableTask == null) {
-            Topology.City closestCity = null;
-            double minDistance = Double.MAX_VALUE;
-            Topology.City from = vehicle.getCurrentCity();
-            for (Topology.City to : from.neighbors()) {
-
-                if (from.distanceTo(to) < minDistance){
-                    minDistance = from.distanceTo(to);
-                    closestCity = to;
-                }
-            }
-            action = new Action.Move(closestCity);
+        if (availableTask == null || random.nextDouble() > pPickup) {
+            City currentCity = vehicle.getCurrentCity();
+            action = new Move(currentCity.randomNeighbor(random));
         } else {
-            action = new Action.Pickup(availableTask);
+            action = new Pickup(availableTask);
         }
 
         if (numActions >= 1) {

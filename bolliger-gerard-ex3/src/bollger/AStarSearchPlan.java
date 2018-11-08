@@ -1,4 +1,4 @@
-package template;
+package bollger;
 
 import logist.plan.Action;
 import logist.plan.Plan;

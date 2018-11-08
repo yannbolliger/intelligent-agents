@@ -1,4 +1,4 @@
-package template;
+package bollger;
 
 import logist.plan.Plan;
 import logist.simulation.Vehicle;

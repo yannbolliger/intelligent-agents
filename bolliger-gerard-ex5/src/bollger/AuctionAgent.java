@@ -1,4 +1,4 @@
-package template;
+package bollger;
 
 //the list of imports
 import java.util.ArrayList;
@@ -21,8 +21,8 @@ import logist.topology.Topology.City;
  * handles them sequentially.
  * 
  */
-@SuppressWarnings("unused")
-public class AuctionTemplate implements AuctionBehavior {
+
+public class AuctionAgent implements AuctionBehavior {
 
 	private Topology topology;
 	private TaskDistribution distribution;

@@ -6,7 +6,7 @@
 	<!-- #### DELIBERATIVE AGENTS ### -->
 	<agent name="deliberative-main">
 		<set class-path="bin/"/>
-		<set class-name="template.DeliberativeAgent"/>
+		<set class-name="bollger.DeliberativeAgent"/>
 		<set algorithm="ASTAR"/>
 	</agent>
 	

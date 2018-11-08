@@ -5,19 +5,19 @@
 
 	<agent name="reactive-random">
 		<set class-path="bin/"/>
-		<set class-name="template.ReactiveRandomAgent"/>
+		<set class-name="bollger.ReactiveRandomAgent"/>
 		<set discount-factor=".85"/>
 	</agent>
 
 	<agent name="reactive-rla">
 		<set class-path="bin/"/>
-		<set class-name="template.ReactiveRLAAgent"/>
+		<set class-name="bollger.ReactiveRLAAgent"/>
 		<set discount-factor=".85"/>
 	</agent>
 
 	<agent name="reactive-dummy">
 		<set class-path="bin/"/>
-		<set class-name="template.ReactiveDummyAgent"/>
+		<set class-name="bollger.ReactiveDummyAgent"/>
 		<set discount-factor="0.3"/>
 	</agent>
 </agents>

@@ -1,7 +1,6 @@
-package template;
+package bollger;
 
 import logist.plan.Action;
-import logist.topology.Topology;
 import logist.topology.Topology.City;
 
 public class ActionSpaceElem {

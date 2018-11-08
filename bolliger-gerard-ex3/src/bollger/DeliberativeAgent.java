@@ -1,22 +1,13 @@
-package template;
+package bollger;
 
 /* import table */
-import logist.plan.Action;
 import logist.simulation.Vehicle;
 import logist.agent.Agent;
 import logist.behavior.DeliberativeBehavior;
 import logist.plan.Plan;
-import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
-import logist.topology.Topology.City;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * An optimal planner for one vehicle.
