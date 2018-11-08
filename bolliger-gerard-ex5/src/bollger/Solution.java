@@ -29,25 +29,8 @@ public class Solution {
         }
 
         for (Task task : tasks){
-            double minCost = Double.POSITIVE_INFINITY;
-            Vehicle bestVehicle = null;
 
-            for (Vehicle vehicle: vehicles) {
-                 ActionSequence actionSequence = taskAssignments.get(vehicle);
-
-                City vehicleNextPosition = vehicle.getCurrentCity();
-                if (!actionSequence.isEmpty()){
-                    vehicleNextPosition = actionSequence.getEndPosition();
-                }
-
-                double costToPickup = vehicle.costPerKm()
-                        * vehicleNextPosition.distanceTo(task.pickupCity);
-
-                if (costToPickup < minCost && task.weight < vehicle.capacity()) {
-                    minCost = costToPickup;
-                    bestVehicle = vehicle;
-                }
-            }
+            Vehicle bestVehicle = findBestVehicle(task, vehicles, taskAssignments);
 
             taskAssignments.put(
                     bestVehicle,
@@ -55,6 +38,48 @@ public class Solution {
             );
         }
         return new Solution(taskAssignments, vehicles);
+    }
+
+    private static Vehicle findBestVehicle(Task task, List<Vehicle> vehicles, Map<Vehicle, ActionSequence> taskAssignments) {
+        double minCost = Double.POSITIVE_INFINITY;
+        Vehicle bestVehicle = null;
+        for (Vehicle vehicle: vehicles) {
+            ActionSequence actionSequence = taskAssignments.get(vehicle);
+
+            City vehicleNextPosition = vehicle.getCurrentCity();
+            if (!actionSequence.isEmpty()){
+                vehicleNextPosition = actionSequence.getEndPosition();
+            }
+
+            double costToPickup = vehicle.costPerKm()
+                    * vehicleNextPosition.distanceTo(task.pickupCity);
+
+            if (costToPickup < minCost && task.weight < vehicle.capacity()) {
+                minCost = costToPickup;
+                bestVehicle = vehicle;
+            }
+        }
+        return bestVehicle;
+    }
+
+    private Solution copy () {
+        Solution copy = new Solution(assignments, vehicles);
+        return copy;
+    }
+
+    public Solution addTask(Task task) {
+        Solution copy = copy();
+
+        Map<Vehicle, ActionSequence> taskAssignments = copy.assignments;
+
+        Vehicle bestVehicle = findBestVehicle(task, vehicles, assignments);
+
+        assignments.put(
+                bestVehicle,
+                assignments.get(bestVehicle).append(task)
+        );
+
+        return copy;
     }
 
     public double getCost() {

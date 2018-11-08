@@ -6,7 +6,7 @@
 	<!-- #### CENTRALIZED AGENTS ### -->
 	<agent name="centralized-main">
 		<set class-path="bin/"/>
-		<set class-name="bollger.CentralizedAgent"/>
+		<set class-name="bollger.CentralizedPlanner"/>
 	</agent>
 	
 </agents>

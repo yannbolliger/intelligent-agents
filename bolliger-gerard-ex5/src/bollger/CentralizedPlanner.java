@@ -1,20 +1,19 @@
 package bollger;
 
 
+import java.util.*;
+
 import logist.LogistSettings;
-import logist.agent.Agent;
+
 import logist.behavior.CentralizedBehavior;
+import logist.agent.Agent;
 import logist.config.Parsers;
-import logist.plan.Plan;
 import logist.simulation.Vehicle;
+import logist.plan.Plan;
+import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
-
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -23,7 +22,7 @@ import java.util.Set;
  *
  */
 
-public class CentralizedAgent implements CentralizedBehavior {
+public class CentralizedPlanner {
     private static final double P = 0.4;
     private static final long DELTA = 3_000;
     private static final int MAX_NEIGHBORS_SIZE = 250_000;
@@ -33,42 +32,39 @@ public class CentralizedAgent implements CentralizedBehavior {
     private Agent agent;
     private long timeoutSetup;
     private long timeoutPlan;
-    
-    @Override
-    public void setup(Topology topology, TaskDistribution distribution,
-            Agent agent) {
-        
-        // this code is used to get the timeouts
-        LogistSettings ls = null;
-        try {
-            ls = Parsers.parseSettings("config/settings_default.xml");
-        }
-        catch (Exception exc) {
-            System.out.println(
-                    "There was a problem loading the configuration file."
-            );
-        }
-        
-        // the setup method cannot last more than timeoutSetup milliseconds
-        timeoutSetup = ls.get(LogistSettings.TimeoutKey.SETUP);
+
+    public void CentralizedPlanner(Topology topology, TaskDistribution distribution,
+            Agent agent, long timeoutPlan) {
         // the plan method cannot execute more than timeoutPlan milliseconds
-        timeoutPlan = ls.get(LogistSettings.TimeoutKey.PLAN);
-        
+        this.timeoutPlan = timeoutPlan;
         this.topology = topology;
         this.distribution = distribution;
         this.agent = agent;
     }
 
-    @Override
-    public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-        long timeStart = System.currentTimeMillis();
 
-        Solution nextSolution = Solution.initial(vehicles, tasks);
+    public Solution plan(Task task, Solution previousSolution) {
+        Solution initialSolution = previousSolution.addTask(task);
+        return findBestSolution(initialSolution);
+    }
+
+    public List<Plan> plan(TaskSet tasks) {
+        long timeStart = System.currentTimeMillis();
+        List<Vehicle> vehicles = agent.vehicles();
+        Solution initialSolution = Solution.initial(vehicles, tasks);
+        Solution bestSolution = findBestSolution(initialSolution);
+        List<Plan> plans = bestSolution.getPlans();
+        return plans;
+    }
+
+    private Solution findBestSolution(Solution initialSolution) {
+        long timeStart = System.currentTimeMillis();
+        List<Vehicle> vehicles = agent.vehicles();
+        Solution nextSolution = initialSolution;
         Solution bestSolution = nextSolution;
         List<Solution> neighbors = new LinkedList<>();
         Set<Solution> formerSolutions = new HashSet<>();
         formerSolutions.add(bestSolution);
-
         while (!runningOutOfTime(timeStart)) {
             List<Solution> newNeighbors = nextSolution.localNeighbors();
             neighbors.addAll(newNeighbors);
@@ -86,21 +82,11 @@ public class CentralizedAgent implements CentralizedBehavior {
                 }
             }
         }
-        List<Plan> plans = bestSolution.getPlans();
-
-        // log used time
-        long timeEnd = System.currentTimeMillis();
-        long duration = timeEnd - timeStart;
-        System.out.println(
-                "The plan was generated in " + duration +
-                        " milliseconds with cost: " + bestSolution.getCost()
-        );
-        return plans;
+        return bestSolution;
     }
 
     private boolean runningOutOfTime(long timeStart) {
         long elapsedTime = System.currentTimeMillis() - timeStart;
-
         return elapsedTime >= timeoutPlan - DELTA;
     }
 
