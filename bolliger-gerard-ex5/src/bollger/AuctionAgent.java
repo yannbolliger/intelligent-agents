@@ -2,12 +2,9 @@ package bollger;
 
 //the list of imports
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import logist.LogistSettings;
-import logist.Measures;
 import logist.behavior.AuctionBehavior;
 import logist.agent.Agent;
 import logist.config.Parsers;
@@ -17,7 +14,6 @@ import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
-import logist.topology.Topology.City;
 
 /**
  * A very simple auction agent that assigns all tasks to its first vehicle and
@@ -27,12 +23,21 @@ import logist.topology.Topology.City;
 
 public class AuctionAgent implements AuctionBehavior {
 
+    private long timeoutSetup;
+    private long timeoutPlan;
+    private long timeoutBid;
+
 	private Topology topology;
 	private TaskDistribution distribution;
 	private Agent agent;
-	private long timeoutSetup;
-	private long timeoutPlan;
-	private long timeoutBid;
+
+	private CentralizedPlanner planner;
+	private TaskSet wonTasks;
+	private Solution currentAssignment;
+	private Solution assignmentWithBiddedTask;
+
+	private int round = 0;
+
 
 	@Override
 	public void setup(Topology topology, TaskDistribution distribution,
@@ -57,22 +62,45 @@ public class AuctionAgent implements AuctionBehavior {
 		this.topology = topology;
 		this.distribution = distribution;
 		this.agent = agent;
+
+		this.wonTasks = TaskSet.create(new Task[0]);
+		this.currentAssignment = Solution.initial(agent.vehicles(), wonTasks);
+
+		this.planner = new CentralizedPlanner();
 	}
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
 
+	    // do bookkeeping if task was won
+	    if (winner == agent.id()) {
+            wonTasks.add(previous);
+            currentAssignment = assignmentWithBiddedTask;
+        }
+
+        ++round;
+        assignmentWithBiddedTask = null;
+
 	}
 
 	@Override
 	public Long askPrice(Task task) {
+        assignmentWithBiddedTask = planner.plan();
 
+        double marginalCost = assignmentWithBiddedTask.getCost() -
+                currentAssignment.getCost();
+
+        distribution.
 		return null;
 	}
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
+		assert(vehicles.equals(agent.vehicles()));
+		assert(tasks.equals(wonTasks));
 
-		return null;
+		Solution finalSolution = planner.plan();
+
+	    return finalSolution.getPlan();
 	}
 }

@@ -5,7 +5,10 @@ import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.topology.Topology;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 class ActionSequence {
     private final static double DISTANCE_NOT_CACHED = -1;

@@ -1,18 +1,20 @@
 package bollger;
 
 
-import java.util.*;
-
 import logist.LogistSettings;
-
-import logist.behavior.CentralizedBehavior;
 import logist.agent.Agent;
+import logist.behavior.CentralizedBehavior;
 import logist.config.Parsers;
-import logist.simulation.Vehicle;
 import logist.plan.Plan;
+import logist.simulation.Vehicle;
 import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
+
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 
 /**
