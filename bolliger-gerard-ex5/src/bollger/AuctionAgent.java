@@ -5,7 +5,6 @@ import java.io.File;
 import java.util.*;
 
 import logist.LogistSettings;
-import logist.Measures;
 import logist.behavior.AuctionBehavior;
 import logist.agent.Agent;
 import logist.config.Parsers;
@@ -25,13 +24,23 @@ import logist.topology.Topology.City;
 
 public class AuctionAgent implements AuctionBehavior {
 
+    private long timeoutSetup;
+    private long timeoutPlan;
+    private long timeoutBid;
+
 	private Topology topology;
 	private TaskDistribution distribution;
 	private Agent agent;
-	private long timeoutSetup;
-	private long timeoutPlan;
-	private long timeoutBid;
+
 	private Map<Integer, Double> expectedLoadOnEdge;
+
+	private CentralizedPlanner planner;
+	private TaskSet wonTasks;
+	private Solution currentAssignment;
+	private Solution assignmentWithBiddedTask;
+
+	private int round = 0;
+
 
 	@Override
 	public void setup(Topology topology, TaskDistribution distribution,
@@ -76,23 +85,45 @@ public class AuctionAgent implements AuctionBehavior {
 			}
 		}
 
+
+		this.wonTasks = TaskSet.create(new Task[0]);
+		this.currentAssignment = Solution.initial(agent.vehicles(), wonTasks);
+
+		this.planner = new CentralizedPlanner(
+		        topology, expectedLoadOnEdge, agent, timeoutPlan
+        );
 	}
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
 
+	    // do bookkeeping if task was won
+	    if (winner == agent.id()) {
+            wonTasks.add(previous);
+            currentAssignment = assignmentWithBiddedTask;
+        }
+
+        ++round;
+        assignmentWithBiddedTask = null;
+
 	}
 
 	@Override
 	public Long askPrice(Task task) {
+        assignmentWithBiddedTask = planner.plan(task, currentAssignment);
 
+        double marginalCost = assignmentWithBiddedTask.getCost() -
+                currentAssignment.getCost();
+        
 		return null;
 	}
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
+		assert(vehicles.equals(agent.vehicles()));
+		assert(tasks.equals(wonTasks));
 
-		return null;
+		return planner.plan(wonTasks);
 	}
 
 

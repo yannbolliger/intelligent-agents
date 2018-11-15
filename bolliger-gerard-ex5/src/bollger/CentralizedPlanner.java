@@ -1,12 +1,9 @@
 package bollger;
 
 
-import java.util.*;
-
 import logist.LogistSettings;
-
-import logist.behavior.CentralizedBehavior;
 import logist.agent.Agent;
+import logist.behavior.CentralizedBehavior;
 import logist.config.Parsers;
 import logist.simulation.Vehicle;
 import logist.plan.Plan;
@@ -14,6 +11,8 @@ import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
+
+import java.util.*;
 
 
 /**
@@ -28,17 +27,18 @@ public class CentralizedPlanner {
     private static final int MAX_NEIGHBORS_SIZE = 250_000;
 
     private Topology topology;
-    private TaskDistribution distribution;
+    private Map<Integer, Double> expectedLoadOnEdge;
     private Agent agent;
     private long timeoutSetup;
     private long timeoutPlan;
 
-    public void CentralizedPlanner(Topology topology, TaskDistribution distribution,
+    public CentralizedPlanner(Topology topology, Map<Integer, Double> expectedLoadOnEdge,
             Agent agent, long timeoutPlan) {
+
         // the plan method cannot execute more than timeoutPlan milliseconds
         this.timeoutPlan = timeoutPlan;
         this.topology = topology;
-        this.distribution = distribution;
+        this.expectedLoadOnEdge = expectedLoadOnEdge;
         this.agent = agent;
     }
 
@@ -49,25 +49,22 @@ public class CentralizedPlanner {
     }
 
     public List<Plan> plan(TaskSet tasks) {
+        long timeStart = System.currentTimeMillis();
         List<Vehicle> vehicles = agent.vehicles();
         Solution initialSolution = Solution.initial(vehicles, tasks);
-
         Solution bestSolution = findBestSolution(initialSolution);
-
         List<Plan> plans = bestSolution.getPlans();
         return plans;
     }
 
     private Solution findBestSolution(Solution initialSolution) {
         long timeStart = System.currentTimeMillis();
-
+        List<Vehicle> vehicles = agent.vehicles();
         Solution nextSolution = initialSolution;
         Solution bestSolution = nextSolution;
-
         List<Solution> neighbors = new LinkedList<>();
         Set<Solution> formerSolutions = new HashSet<>();
         formerSolutions.add(bestSolution);
-
         while (!runningOutOfTime(timeStart)) {
             List<Solution> newNeighbors = nextSolution.localNeighbors();
             neighbors.addAll(newNeighbors);
