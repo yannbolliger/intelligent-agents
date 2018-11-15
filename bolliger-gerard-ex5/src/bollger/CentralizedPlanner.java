@@ -26,19 +26,12 @@ public class CentralizedPlanner {
     private static final long DELTA = 3_000;
     private static final int MAX_NEIGHBORS_SIZE = 250_000;
 
-    private Topology topology;
-    private Map<Integer, Double> expectedLoadOnEdge;
     private Agent agent;
-    private long timeoutSetup;
     private long timeoutPlan;
 
-    public CentralizedPlanner(Topology topology, Map<Integer, Double> expectedLoadOnEdge,
-            Agent agent, long timeoutPlan) {
-
+    public CentralizedPlanner(Agent agent, long timeoutPlan) {
         // the plan method cannot execute more than timeoutPlan milliseconds
         this.timeoutPlan = timeoutPlan;
-        this.topology = topology;
-        this.expectedLoadOnEdge = expectedLoadOnEdge;
         this.agent = agent;
     }
 
