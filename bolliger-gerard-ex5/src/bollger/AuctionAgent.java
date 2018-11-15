@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.*;
 
 import logist.LogistSettings;
+import logist.Measures;
 import logist.behavior.AuctionBehavior;
 import logist.agent.Agent;
 import logist.config.Parsers;
@@ -24,40 +25,25 @@ import logist.topology.Topology.City;
 
 public class AuctionAgent implements AuctionBehavior {
 
-    private static final int LOSS_ROUNDS = 3;
-    private static final int ROUNDS_TO_PROFIT = 10;
-    private static final long BID_DELTA = 1_000;
-
-    private long timeoutSetup;
-    private long timeoutPlan;
-    private long timeoutBid;
-
 	private Topology topology;
 	private TaskDistribution distribution;
 	private Agent agent;
-
-	private CentralizedPlanner planner;
-	private TaskSet wonTasks;
-	private Solution currentAssignment;
-	private Solution assignmentWithBiddedTask;
-
-	private int round = 0;
-	private double gains = 0;
-
+	private long timeoutSetup;
+	private long timeoutPlan;
+	private long timeoutBid;
+	private Map<Integer, Double> expectedLoadOnEdge;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution distribution,
 			Agent agent) {
-        long timeStart = System.nanoTime();
 
         // this code is used to get the timeouts
         LogistSettings ls = null;
         try {
-            ls = Parsers.parseSettings(
-                    "config" + File.separator + "settings_default.xml"
-            );
+            ls = Parsers.parseSettings("config" + File.separator +
+                    "settings_default.xml");
         }
-        catch (Exception e) {
+        catch (Exception exc) {
             System.out.println(
                     "There was a problem loading the configuration file."
             );
@@ -70,70 +56,47 @@ public class AuctionAgent implements AuctionBehavior {
 		this.topology = topology;
 		this.distribution = distribution;
 		this.agent = agent;
+		this.expectedLoadOnEdge = new HashMap<>();
 
-		this.wonTasks = TaskSet.create(new Task[0]);
-		this.currentAssignment = Solution.initial(agent.vehicles(), wonTasks);
 
-		this.planner = new CentralizedPlanner(
-		        topology, distribution, agent, timeoutBid - BID_DELTA
-        );
+		for (City pickupCity : topology.cities()) {
+			for (City deliveryCity : topology.cities()) {
+				Iterator<City> pathEdges = pickupCity.pathTo(deliveryCity).iterator();
+				City previousCity = null;
+				while (pathEdges.hasNext()){
+				    City currentCity = pathEdges.next();
+					if (previousCity != null) {
+					    int edgeHash = getEdgeHash(previousCity, currentCity);
+						double expectedLoad = expectedLoadOnEdge.getOrDefault(edgeHash, 0.);
+                        expectedLoad += distribution.probability(previousCity, currentCity) * distribution.weight(previousCity, currentCity);
+                        expectedLoadOnEdge.put(edgeHash, expectedLoad);
+					}
+					previousCity = currentCity;
+				}
+			}
+		}
+
 	}
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
 
-	    // do bookkeeping if task was won
-	    if (winner == agent.id()) {
-            wonTasks.add(previous);
-            gains = wonTasks.rewardSum() - assignmentWithBiddedTask.getCost();
-            currentAssignment = assignmentWithBiddedTask;
-        }
-
-        ++round;
-        assignmentWithBiddedTask = null;
 	}
 
 	@Override
 	public Long askPrice(Task task) {
-	    Double price = askPriceDouble(task);
-        return price == null ? null : (long) Math.ceil(price);
+
+		return null;
 	}
-
-	private Double askPriceDouble(Task task) {
-        assignmentWithBiddedTask = planner.plan(task, currentAssignment);
-
-        double marginalCost = assignmentWithBiddedTask.getCost() -
-                currentAssignment.getCost();
-
-        if (round < LOSS_ROUNDS) {
-            return costOnlyDeliveryFirstTask(task);
-        }
-        else if (gains < 0) {
-            return marginalCost + -gains/Math.max(1, ROUNDS_TO_PROFIT - round);
-        }
-
-        return marginalCost + 1;
-    }
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-		return new CentralizedPlanner(
-		        topology, distribution,
-                agent, timeoutPlan
-        ).plan(tasks);
+
+		return null;
 	}
 
-	private double costOnlyDeliveryFirstTask(Task task) {
-	    double minCost = Double.POSITIVE_INFINITY;
-	    Vehicle cheapestVehicle = null;
 
-	    for (Vehicle v : agent.vehicles()) {
-	        if (v.costPerKm() < minCost) {
-	            minCost = v.costPerKm();
-	            cheapestVehicle = v;
-            }
-        }
-
-        return task.pathLength() * cheapestVehicle.costPerKm();
+	private int getEdgeHash(City from, City to) {
+	    return from.hashCode() + to.hashCode();
     }
 }
