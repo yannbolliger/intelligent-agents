@@ -66,8 +66,9 @@ class ActionSequence {
         return distance;
     }
 
-    double estimatedMaxGain(Map<Integer, Double> expectedLoadOnEdge) {
+    double estimatedMaxGain(Map<Integer, Double> expectedLoadOnEdge, int round) {
         double estimatedMaxGain = 0;
+        int currentLoad = 0;
         City currentCity = vehicle.getCurrentCity();
 
         for (TaskAction action: actions) {
@@ -80,16 +81,39 @@ class ActionSequence {
 
                     int edgeHash = currentCity.hashCode() + city.hashCode();
 
+                    double expectedCapacityOnEdge = Math.min(
+                            vehicle.capacity(),
+                            expectedLoadOnEdge.get(edgeHash)
+                                    * guessFutureNumberAuctions(round)
+                    );
+
+                    double loadFactor = Math.min(0,
+                            (expectedCapacityOnEdge - currentLoad)/vehicle.capacity()
+                    );
+
                     estimatedMaxGain += currentCity.distanceTo(city)
-                            * vehicle.costPerKm()
-                            * expectedLoadOnEdge.get(edgeHash);
+                            * loadFactor * vehicle.costPerKm();
 
                     currentCity = city;
                 }
             }
+
+            if (action.isPickup()) currentLoad += action.getTask().weight;
+            else currentLoad -= action.getTask().weight;
         }
 
         return estimatedMaxGain;
+    }
+
+    /**
+     * This number estimates the number of future auctions with a function that
+     * is chosen to decay quite fast. It will estimate 10 more auctions in
+     * round 1 and 5 more auctions in round 10.
+     * @param round
+     * @return estimated number of future auctions
+     */
+    private double guessFutureNumberAuctions(int round) {
+        return -(5/Math.log1p(10)) * Math.log1p(round) + 8;
     }
 
     public Plan getPlan(Vehicle vehicle) {

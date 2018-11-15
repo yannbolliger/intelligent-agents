@@ -24,7 +24,7 @@ import logist.topology.Topology.City;
 
 public class AuctionAgent implements AuctionBehavior {
 
-    private static final int LOSS_ROUNDS = 3;
+    private static final int LOSS_ROUNDS = 6;
     private static final int ROUNDS_TO_PROFIT = 10;
     private static final long BID_DELTA = 1_000;
 
@@ -39,12 +39,14 @@ public class AuctionAgent implements AuctionBehavior {
 	private Map<Integer, Double> expectedLoadOnEdge;
 
 	private CentralizedPlanner planner;
-	private TaskSet wonTasks;
 	private Solution currentAssignment;
+	private double currentEstimatedMaxGain = 0;
 	private Solution assignmentWithBiddedTask;
 
 	private int round = 0;
 	private double gains = 0;
+	private int numberWonTasks = 0;
+	private long rewardSum = 0;
 
 
 	@Override
@@ -56,7 +58,7 @@ public class AuctionAgent implements AuctionBehavior {
         LogistSettings ls = null;
         try {
             ls = Parsers.parseSettings(
-                    "config" + File.separator + "settings_default.xml"
+                    "config" + File.separator + "settings_auction.xml"
             );
         }
         catch (Exception e) {
@@ -97,10 +99,12 @@ public class AuctionAgent implements AuctionBehavior {
 		}
 
 
-		this.wonTasks = TaskSet.create(new Task[0]);
-		this.currentAssignment = Solution.initial(agent.vehicles(), wonTasks);
+		TaskSet emptySet = TaskSet.create(new Task[0]);
+		this.currentAssignment = Solution.initial(agent.vehicles(), emptySet);
 
-		this.planner = new CentralizedPlanner(agent, timeoutBid - BID_DELTA);
+		this.planner = new CentralizedPlanner(
+		        agent.vehicles(), timeoutBid - BID_DELTA
+        );
 	}
 
 	@Override
@@ -108,8 +112,9 @@ public class AuctionAgent implements AuctionBehavior {
 
 	    // do bookkeeping if task was won
 	    if (winner == agent.id()) {
-            wonTasks.add(previous);
-            gains = wonTasks.rewardSum() - assignmentWithBiddedTask.getCost();
+	        ++numberWonTasks;
+	        rewardSum += previous.reward;
+            gains = rewardSum - assignmentWithBiddedTask.getCost();
             currentAssignment = assignmentWithBiddedTask;
         }
 
@@ -129,8 +134,11 @@ public class AuctionAgent implements AuctionBehavior {
         double marginalCost = assignmentWithBiddedTask.getCost() -
                 currentAssignment.getCost();
 
-        if (round < LOSS_ROUNDS) {
-            return costOnlyDeliveryFirstTask(task);
+        double marginalEstimatedMaxGain = currentEstimatedMaxGain
+                - assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round);
+
+        if (round + numberWonTasks < LOSS_ROUNDS) {
+            return marginalCost - marginalEstimatedMaxGain * 0.4;
         }
         else if (gains < 0) {
             return marginalCost + -gains/Math.max(1, ROUNDS_TO_PROFIT - round);
@@ -141,22 +149,8 @@ public class AuctionAgent implements AuctionBehavior {
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-		return new CentralizedPlanner(agent, timeoutPlan).plan(tasks);
+		return new CentralizedPlanner(agent.vehicles(), timeoutPlan).plan(tasks);
 	}
-
-	private double costOnlyDeliveryFirstTask(Task task) {
-	    double minCost = Double.POSITIVE_INFINITY;
-	    Vehicle cheapestVehicle = null;
-
-	    for (Vehicle v : agent.vehicles()) {
-	        if (v.costPerKm() < minCost) {
-	            minCost = v.costPerKm();
-	            cheapestVehicle = v;
-            }
-        }
-
-        return task.pathLength() * cheapestVehicle.costPerKm();
-    }
 
 	private int getEdgeHash(City from, City to) {
 	    return from.hashCode() + to.hashCode();

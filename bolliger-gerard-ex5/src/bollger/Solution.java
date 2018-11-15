@@ -166,12 +166,16 @@ public class Solution {
         return solutions;
     }
 
-    public double estimatedMaxGain(Map<Integer, Double> expectedLoadOnEdge) {
+    public double estimatedMaxGain(
+            Map<Integer, Double> expectedLoadOnEdge,
+            int round
+    ) {
         double estimatedMaxGain = 0;
 
         for (Map.Entry<Vehicle, ActionSequence> entry : assignments.entrySet()) {
+            ActionSequence vehicle = entry.getValue();
             estimatedMaxGain +=
-                    entry.getValue().estimatedMaxGain(expectedLoadOnEdge);
+                    vehicle.estimatedMaxGain(expectedLoadOnEdge, round);
         }
 
         return estimatedMaxGain;
