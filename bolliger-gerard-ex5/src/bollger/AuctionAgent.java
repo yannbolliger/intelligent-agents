@@ -112,6 +112,8 @@ public class AuctionAgent implements AuctionBehavior {
 
 	    // do bookkeeping if task was won
 	    if (winner == agent.id()) {
+	        System.out.println("Agent " + agent.id() + " wins.");
+
 	        ++numberWonTasks;
 	        rewardSum += previous.reward;
             gains = rewardSum - assignmentWithBiddedTask.getCost();
@@ -120,11 +122,20 @@ public class AuctionAgent implements AuctionBehavior {
 
         ++round;
         assignmentWithBiddedTask = null;
+
+        System.out.println("Agent " + agent.id() + " has gains: " + gains);
 	}
 
 	@Override
 	public Long askPrice(Task task) {
+	    if (agent.id() == 0) {
+	        System.out.println("\n\n============================");
+	        System.out.println("Round " + round);
+	        System.out.println("============================");
+        }
+
 	    Double price = askPriceDouble(task);
+	    System.out.println("Agent " + agent.id() + " bids " + price);
         return price == null ? null : (long) Math.ceil(price);
 	}
 
