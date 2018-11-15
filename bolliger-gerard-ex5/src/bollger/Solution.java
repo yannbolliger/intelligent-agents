@@ -4,6 +4,7 @@ import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.task.TaskSet;
+import logist.topology.Topology;
 import logist.topology.Topology.City;
 
 import java.util.*;
@@ -21,6 +22,11 @@ public class Solution {
         this.assignments = taskAssignment;
         this.vehicles = vehicles;
     }
+
+    protected Map<Vehicle, ActionSequence> getAssignments() {
+        return Collections.unmodifiableMap(assignments);
+    }
+
 
     public static Solution initial(List<Vehicle> vehicles, TaskSet tasks) {
         Map<Vehicle, ActionSequence> taskAssignments = new HashMap();
@@ -93,6 +99,7 @@ public class Solution {
         return this.cost;
     }
 
+
     public List<Plan> getPlans() {
         List<Plan> plans = new ArrayList<>();
 
@@ -157,6 +164,17 @@ public class Solution {
             solutions.add(new Solution(newAssignments, vehicles));
         }
         return solutions;
+    }
+
+    public double estimatedMaxGain(Map<Integer, Double> expectedLoadOnEdge) {
+        double estimatedMaxGain = 0;
+
+        for (Map.Entry<Vehicle, ActionSequence> entry : assignments.entrySet()) {
+            estimatedMaxGain +=
+                    entry.getValue().estimatedMaxGain(expectedLoadOnEdge);
+        }
+
+        return estimatedMaxGain;
     }
 
     @Override

@@ -49,22 +49,25 @@ public class CentralizedPlanner {
     }
 
     public List<Plan> plan(TaskSet tasks) {
-        long timeStart = System.currentTimeMillis();
         List<Vehicle> vehicles = agent.vehicles();
         Solution initialSolution = Solution.initial(vehicles, tasks);
+
         Solution bestSolution = findBestSolution(initialSolution);
+
         List<Plan> plans = bestSolution.getPlans();
         return plans;
     }
 
     private Solution findBestSolution(Solution initialSolution) {
         long timeStart = System.currentTimeMillis();
-        List<Vehicle> vehicles = agent.vehicles();
+
         Solution nextSolution = initialSolution;
         Solution bestSolution = nextSolution;
+
         List<Solution> neighbors = new LinkedList<>();
         Set<Solution> formerSolutions = new HashSet<>();
         formerSolutions.add(bestSolution);
+
         while (!runningOutOfTime(timeStart)) {
             List<Solution> newNeighbors = nextSolution.localNeighbors();
             neighbors.addAll(newNeighbors);

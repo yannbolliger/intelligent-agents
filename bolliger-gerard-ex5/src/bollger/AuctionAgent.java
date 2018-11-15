@@ -14,6 +14,7 @@ import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
+import logist.topology.Topology.City;
 
 /**
  * A very simple auction agent that assigns all tasks to its first vehicle and
@@ -22,6 +23,10 @@ import logist.topology.Topology;
  */
 
 public class AuctionAgent implements AuctionBehavior {
+
+    private static final int LOSS_ROUNDS = 3;
+    private static final int ROUNDS_TO_PROFIT = 10;
+    private static final long BID_DELTA = 1_000;
 
     private long timeoutSetup;
     private long timeoutPlan;
@@ -37,19 +42,22 @@ public class AuctionAgent implements AuctionBehavior {
 	private Solution assignmentWithBiddedTask;
 
 	private int round = 0;
+	private double gains = 0;
 
 
 	@Override
 	public void setup(Topology topology, TaskDistribution distribution,
 			Agent agent) {
+        long timeStart = System.nanoTime();
 
         // this code is used to get the timeouts
         LogistSettings ls = null;
         try {
-            ls = Parsers.parseSettings("config" + File.separator +
-                    "settings_default.xml");
+            ls = Parsers.parseSettings(
+                    "config" + File.separator + "settings_default.xml"
+            );
         }
-        catch (Exception exc) {
+        catch (Exception e) {
             System.out.println(
                     "There was a problem loading the configuration file."
             );
@@ -66,7 +74,9 @@ public class AuctionAgent implements AuctionBehavior {
 		this.wonTasks = TaskSet.create(new Task[0]);
 		this.currentAssignment = Solution.initial(agent.vehicles(), wonTasks);
 
-		this.planner = new CentralizedPlanner();
+		this.planner = new CentralizedPlanner(
+		        topology, distribution, agent, timeoutBid - BID_DELTA
+        );
 	}
 
 	@Override
@@ -75,32 +85,55 @@ public class AuctionAgent implements AuctionBehavior {
 	    // do bookkeeping if task was won
 	    if (winner == agent.id()) {
             wonTasks.add(previous);
+            gains = wonTasks.rewardSum() - assignmentWithBiddedTask.getCost();
             currentAssignment = assignmentWithBiddedTask;
         }
 
         ++round;
         assignmentWithBiddedTask = null;
-
 	}
 
 	@Override
 	public Long askPrice(Task task) {
-        assignmentWithBiddedTask = planner.plan();
+	    Double price = askPriceDouble(task);
+        return price == null ? null : (long) Math.ceil(price);
+	}
+
+	private Double askPriceDouble(Task task) {
+        assignmentWithBiddedTask = planner.plan(task, currentAssignment);
 
         double marginalCost = assignmentWithBiddedTask.getCost() -
                 currentAssignment.getCost();
 
-        distribution.
-		return null;
-	}
+        if (round < LOSS_ROUNDS) {
+            return costOnlyDeliveryFirstTask(task);
+        }
+        else if (gains < 0) {
+            return marginalCost + -gains/Math.max(1, ROUNDS_TO_PROFIT - round);
+        }
+
+        return marginalCost + 1;
+    }
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-		assert(vehicles.equals(agent.vehicles()));
-		assert(tasks.equals(wonTasks));
-
-		Solution finalSolution = planner.plan();
-
-	    return finalSolution.getPlan();
+		return new CentralizedPlanner(
+		        topology, distribution,
+                agent, timeoutPlan
+        ).plan(tasks);
 	}
+
+	private double costOnlyDeliveryFirstTask(Task task) {
+	    double minCost = Double.POSITIVE_INFINITY;
+	    Vehicle cheapestVehicle = null;
+
+	    for (Vehicle v : agent.vehicles()) {
+	        if (v.costPerKm() < minCost) {
+	            minCost = v.costPerKm();
+	            cheapestVehicle = v;
+            }
+        }
+
+        return task.pathLength() * cheapestVehicle.costPerKm();
+    }
 }

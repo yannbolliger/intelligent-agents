@@ -4,11 +4,9 @@ import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.topology.Topology;
+import logist.topology.Topology.City;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 class ActionSequence {
     private final static double DISTANCE_NOT_CACHED = -1;
@@ -68,8 +66,34 @@ class ActionSequence {
         return distance;
     }
 
+    double estimatedMaxGain(Map<Integer, Double> expectedLoadOnEdge) {
+        double estimatedMaxGain = 0;
+        City currentCity = vehicle.getCurrentCity();
+
+        for (TaskAction action: actions) {
+            Topology.City next = action.isPickup() ?
+                    action.getTask().pickupCity :
+                    action.getTask().deliveryCity;
+
+            if (!currentCity.equals(next)) {
+                for (City city : currentCity.pathTo(next)) {
+
+                    int edgeHash = currentCity.hashCode() + city.hashCode();
+
+                    estimatedMaxGain += currentCity.distanceTo(city)
+                            * vehicle.costPerKm()
+                            * expectedLoadOnEdge.get(edgeHash);
+
+                    currentCity = city;
+                }
+            }
+        }
+
+        return estimatedMaxGain;
+    }
+
     public Plan getPlan(Vehicle vehicle) {
-        Topology.City current = vehicle.getCurrentCity();
+        City current = vehicle.getCurrentCity();
         Plan plan = new Plan(current);
 
         for (TaskAction taskAction: actions) {
