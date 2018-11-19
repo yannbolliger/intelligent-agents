@@ -87,7 +87,7 @@ class ActionSequence {
                                     * guessFutureNumberAuctions(round)
                     );
 
-                    double loadFactor = Math.min(0,
+                    double loadFactor = Math.max(0,
                             (expectedCapacityOnEdge - currentLoad)/vehicle.capacity()
                     );
 

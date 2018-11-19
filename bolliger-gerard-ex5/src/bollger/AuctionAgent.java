@@ -145,9 +145,9 @@ public class AuctionAgent implements AuctionBehavior {
         double marginalCost = assignmentWithBiddedTask.getCost() -
                 currentAssignment.getCost();
 
-        double marginalEstimatedMaxGain = currentEstimatedMaxGain
-                - assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round);
-
+        double marginalEstimatedMaxGain = assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round)
+				- currentEstimatedMaxGain;
+        
         if (round + numberWonTasks < LOSS_ROUNDS) {
             return marginalCost - marginalEstimatedMaxGain * 0.4;
         }

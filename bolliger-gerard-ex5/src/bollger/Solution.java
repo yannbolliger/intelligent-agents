@@ -68,22 +68,19 @@ public class Solution {
         return bestVehicle;
     }
 
-    private Solution copy () {
-        Solution copy = new Solution(assignments, vehicles);
-        return copy;
-    }
 
     public Solution addTask(Task task) {
-        Solution copy = copy();
+        Map<Vehicle, ActionSequence> newTaskAssignments = new HashMap(assignments);
 
-        Map<Vehicle, ActionSequence> taskAssignments = copy.assignments;
+        Vehicle bestVehicle = findBestVehicle(task, vehicles, newTaskAssignments);
 
-        Vehicle bestVehicle = findBestVehicle(task, vehicles, assignments);
-
-        assignments.put(
+        newTaskAssignments.put(
                 bestVehicle,
                 assignments.get(bestVehicle).append(task)
         );
+
+        Solution copy = new Solution(newTaskAssignments, vehicles);
+
 
         return copy;
     }
