@@ -39,6 +39,10 @@ public class CentralizedPlanner {
     public List<Plan> plan(TaskSet tasks) {
         Solution initialSolution = Solution.initial(vehicles, tasks);
 
+        if (tasks.isEmpty()){
+            return initialSolution.getPlans();
+        }
+
         Solution bestSolution = findBestSolution(initialSolution);
 
         List<Plan> plans = bestSolution.getPlans();
