@@ -122,13 +122,17 @@ public class Solution {
 
         // Generate all new solutions from giving the first task to another
         // vehicle
-        for (Vehicle other: vehicles) {
-            if (other.equals(vehicle)) continue;
+        // Choose random vehicle with at least one task
+        Vehicle other = null;
+        do {
+            other = vehicles.get(new Random().nextInt(vehicles.size()));
+        } while (other.equals(vehicle));
 
-            solutions.addAll(
-                    reassignFirstTask(assignment, assignments.get(other))
-            );
-        }
+
+        solutions.addAll(
+                reassignFirstTask(assignment, assignments.get(other))
+        );
+
 
         // Generate all solutions by reordering the actions in this vehicle's
         // ActionSequence

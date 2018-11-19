@@ -182,32 +182,32 @@ class ActionSequence {
     public List<ActionSequence> reorderTasks() {
         List<ActionSequence> possibleCombinations = new LinkedList<>();
 
-        for (TaskAction action : actions) {
-            if (action.isPickup()) {
+        TaskAction action = actions.get(new Random().nextInt(actions.size()));
+        if (action.isPickup()) {
 
-                ActionSequence seqWithoutTask = removeTask(action.getTask());
-                DeliveryAction delivery = new DeliveryAction(action.getTask());
+            ActionSequence seqWithoutTask = removeTask(action.getTask());
+            DeliveryAction delivery = new DeliveryAction(action.getTask());
 
-                for (int posPickup = 0;
-                     posPickup <= seqWithoutTask.actions.size(); posPickup++) {
+            for (int posPickup = 0;
+                 posPickup <= seqWithoutTask.actions.size(); posPickup++) {
 
-                    ActionSequence seqWithOnlyPickup =
-                            seqWithoutTask.insertAt(action, posPickup);
+                ActionSequence seqWithOnlyPickup =
+                        seqWithoutTask.insertAt(action, posPickup);
 
-                    for (int posDelivery = posPickup + 1;
-                         posDelivery <= seqWithOnlyPickup.actions.size();
-                         posDelivery++) {
+                for (int posDelivery = posPickup + 1;
+                     posDelivery <= seqWithOnlyPickup.actions.size();
+                     posDelivery++) {
 
-                        ActionSequence reorderedSeq =
-                                seqWithOnlyPickup.insertAt(delivery, posDelivery);
+                    ActionSequence reorderedSeq =
+                            seqWithOnlyPickup.insertAt(delivery, posDelivery);
 
-                        if (reorderedSeq.checkCapacityIsRespected()) {
-                            possibleCombinations.add(reorderedSeq);
-                        }
+                    if (reorderedSeq.checkCapacityIsRespected()) {
+                        possibleCombinations.add(reorderedSeq);
                     }
                 }
             }
         }
+
         return possibleCombinations;
     }
 

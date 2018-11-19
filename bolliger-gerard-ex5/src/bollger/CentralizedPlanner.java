@@ -17,7 +17,7 @@ import java.util.*;
  */
 
 public class CentralizedPlanner {
-    private static final double P = 0.4;
+    private static final double P = 0.8;
     private static final long DELTA = 3_000;
     private static final int MAX_NEIGHBORS_SIZE = 250_000;
 
@@ -52,18 +52,14 @@ public class CentralizedPlanner {
         Solution bestSolution = nextSolution;
 
         List<Solution> neighbors = new LinkedList<>();
-        Set<Solution> formerSolutions = new HashSet<>();
-        formerSolutions.add(bestSolution);
 
         while (!runningOutOfTime(timeStart)) {
             List<Solution> newNeighbors = nextSolution.localNeighbors();
             neighbors.addAll(newNeighbors);
-            neighbors.removeAll(formerSolutions);
 
             Solution newSolution = localChoice(neighbors);
 
             if (newSolution != null) {
-                formerSolutions.add(newSolution);
                 nextSolution = newSolution;
                 neighbors = new LinkedList<>();
 
