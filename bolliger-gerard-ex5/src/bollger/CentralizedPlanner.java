@@ -18,7 +18,7 @@ import java.util.*;
 
 public class CentralizedPlanner {
     private static final double P = 0.8;
-    private static final long DELTA = 3_000;
+    private static final long DELTA = 200;
     private static final int MAX_NEIGHBORS_SIZE = 250_000;
 
     private List<Vehicle> vehicles;
@@ -46,6 +46,7 @@ public class CentralizedPlanner {
         Solution bestSolution = findBestSolution(initialSolution);
 
         List<Plan> plans = bestSolution.getPlans();
+        System.out.println("Total cost is " + bestSolution.getCost());
         return plans;
     }
 

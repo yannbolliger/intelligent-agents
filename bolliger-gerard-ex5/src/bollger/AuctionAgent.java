@@ -4,6 +4,7 @@ package bollger;
 import java.io.File;
 import java.util.*;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import logist.LogistSettings;
 import logist.behavior.AuctionBehavior;
 import logist.agent.Agent;
@@ -26,7 +27,7 @@ public class AuctionAgent implements AuctionBehavior {
 
     private static final int LOSS_ROUNDS = 6;
     private static final int ROUNDS_TO_PROFIT = 10;
-    private static final long BID_DELTA = 1_000;
+    private static final long BID_DELTA = 200;
 
     private long timeoutSetup;
     private long timeoutPlan;
@@ -123,7 +124,7 @@ public class AuctionAgent implements AuctionBehavior {
         ++round;
         assignmentWithBiddedTask = null;
 
-        System.out.println("Agent " + agent.id() + " has gains: " + gains);
+        System.out.println("Agent " + agent.id() + " has gains: " + gains + "total rewards " + rewardSum);
 	}
 
 	@Override
@@ -147,20 +148,37 @@ public class AuctionAgent implements AuctionBehavior {
 
         double marginalEstimatedMaxGain = assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round)
 				- currentEstimatedMaxGain;
-        
+        System.out.println("marginalCost " + marginalCost);
         if (round + numberWonTasks < LOSS_ROUNDS) {
-            return marginalCost - marginalEstimatedMaxGain * 0.4;
+            return Math.max(minimumPathCost(task, false), marginalCost - marginalEstimatedMaxGain * 0.1);
         }
         else if (gains < 0) {
-            return marginalCost + -gains/Math.max(1, ROUNDS_TO_PROFIT - round);
+            return Math.max(minimumPathCost(task, false), marginalCost + -gains/Math.max(1, ROUNDS_TO_PROFIT - round));
         }
 
-        return marginalCost + 1;
+        return Math.max(3 / 4 * minimumPathCost(task, true), marginalCost + 1);
     }
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
 		return new CentralizedPlanner(agent.vehicles(), timeoutPlan).plan(tasks);
+	}
+
+	private double minimumPathCost(Task task, Boolean fullCapacity) {
+		double minCost = Double.POSITIVE_INFINITY;
+		Vehicle cheapestVehicle = null;
+
+		for (Vehicle v : agent.vehicles()) {
+			if (v.costPerKm() < minCost) {
+				minCost = v.costPerKm();
+				cheapestVehicle = v;
+			}
+		}
+		if (fullCapacity) {
+			return task.pathLength() * cheapestVehicle.costPerKm();
+		}
+
+		return task.pathLength() * cheapestVehicle.costPerKm() * task.weight / cheapestVehicle.capacity();
 	}
 
 	private int getEdgeHash(City from, City to) {
