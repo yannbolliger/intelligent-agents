@@ -4,7 +4,6 @@ package bollger;
 import java.io.File;
 import java.util.*;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import logist.LogistSettings;
 import logist.behavior.AuctionBehavior;
 import logist.agent.Agent;
@@ -124,7 +123,10 @@ public class AuctionAgent implements AuctionBehavior {
         ++round;
         assignmentWithBiddedTask = null;
 
-        System.out.println("Agent " + agent.id() + " has gains: " + gains + "total rewards " + rewardSum);
+        System.out.println(
+                "Agent " + agent.id() + " has gains: " + gains
+                + "total rewards " + rewardSum
+        );
 	}
 
 	@Override
@@ -146,17 +148,28 @@ public class AuctionAgent implements AuctionBehavior {
         double marginalCost = assignmentWithBiddedTask.getCost() -
                 currentAssignment.getCost();
 
-        double marginalEstimatedMaxGain = assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round)
+        double marginalEstimatedMaxGain =
+                assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round)
 				- currentEstimatedMaxGain;
+
         System.out.println("marginalCost " + marginalCost);
+
         if (round + numberWonTasks < LOSS_ROUNDS) {
-            return Math.max(minimumPathCost(task, false), marginalCost - marginalEstimatedMaxGain * 0.1);
+            return Math.max(
+                    minimumPathCost(task, false),
+                    marginalCost - marginalEstimatedMaxGain * 0.1
+            );
         }
         else if (gains < 0) {
-            return Math.max(minimumPathCost(task, false), marginalCost + -gains/Math.max(1, ROUNDS_TO_PROFIT - round));
+            return Math.max(
+                    minimumPathCost(task, false),
+                    marginalCost + -gains/Math.max(1, ROUNDS_TO_PROFIT - round)
+            );
         }
-
-        return Math.max(3 / 4 * minimumPathCost(task, true), marginalCost + 1);
+        return Math.max(
+                0.75 * minimumPathCost(task, true),
+                marginalCost + 1
+        );
     }
 
 	@Override
@@ -174,11 +187,10 @@ public class AuctionAgent implements AuctionBehavior {
 				cheapestVehicle = v;
 			}
 		}
-		if (fullCapacity) {
-			return task.pathLength() * cheapestVehicle.costPerKm();
-		}
+		double pathCost = task.pathLength() * cheapestVehicle.costPerKm();
 
-		return task.pathLength() * cheapestVehicle.costPerKm() * task.weight / cheapestVehicle.capacity();
+		if (fullCapacity) return pathCost;
+		else return pathCost * task.weight / cheapestVehicle.capacity();
 	}
 
 	private int getEdgeHash(City from, City to) {

@@ -1,7 +1,6 @@
 package bollger;
 
 
-import logist.agent.Agent;
 import logist.simulation.Vehicle;
 import logist.plan.Plan;
 import logist.task.Task;
@@ -39,9 +38,8 @@ public class CentralizedPlanner {
     public List<Plan> plan(TaskSet tasks) {
         Solution initialSolution = Solution.initial(vehicles, tasks);
 
-        if (tasks.isEmpty()){
-            return initialSolution.getPlans();
-        }
+        // we don't have to search for a solution if there are no tasks
+        if (tasks.isEmpty()) return initialSolution.getPlans();
 
         Solution bestSolution = findBestSolution(initialSolution);
 
