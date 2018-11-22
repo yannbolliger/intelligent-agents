@@ -117,6 +117,9 @@ public class AuctionAgent implements AuctionBehavior {
 	        ++numberWonTasks;
 	        rewardSum += previous.reward;
             gains = rewardSum - assignmentWithBiddedTask.getCost();
+            currentEstimatedMaxGain =
+                    assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round);
+
             currentAssignment = assignmentWithBiddedTask;
         }
 
@@ -153,6 +156,9 @@ public class AuctionAgent implements AuctionBehavior {
 				- currentEstimatedMaxGain;
 
         System.out.println("marginalCost " + marginalCost);
+        System.out.println("estimatedMaxGain of new task" + assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round));
+        System.out.println("currentEstimatedMaxGain " + currentEstimatedMaxGain);
+        System.out.println("marginalEstimatedMaxGain " + marginalEstimatedMaxGain);
 
         // Phase 1 bidding
         if (round + numberWonTasks < LOSS_ROUNDS) {
