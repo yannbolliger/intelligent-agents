@@ -87,9 +87,9 @@ class ActionSequence {
                                     * guessFutureNumberAuctions(round)
                     );
 
-                    double loadFactor = Math.max(0,
+                    double loadFactor = Math.min(1, Math.max(0,
                             (expectedCapacityOnEdge - currentLoad)/vehicle.capacity()
-                    );
+                    ));
 
                     estimatedMaxGain += currentCity.distanceTo(city)
                             * loadFactor * vehicle.costPerKm();
