@@ -1,8 +1,10 @@
 package bollger;
 
+import logist.plan.Action;
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
+import logist.task.TaskSet;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
 
@@ -211,11 +213,37 @@ class ActionSequence {
         return possibleCombinations;
     }
 
-    private ActionSequence copy() {
+    ActionSequence translateTo(TaskSet tasks) {
+        ActionSequence newSeq = new ActionSequence(vehicle, Collections.EMPTY_LIST);
+
+        for (TaskAction action : this.actions) {
+            Task newTask = findNewTask(tasks, action.getTask());
+            tasks.remove(newTask);
+
+            if (action.isPickup()) {
+                newSeq.actions.add(new PickupAction(newTask));
+            }
+            else {
+                newSeq.actions.add(new DeliveryAction(newTask));
+            }
+        }
+        return newSeq;
+    }
+
+    private Task findNewTask(TaskSet tasks, Task task) {
+        for (Task newTask : tasks) {
+            if (newTask.deliveryCity.equals(task.deliveryCity) &&
+                    newTask.pickupCity.equals(task.pickupCity) &&
+                    newTask.weight == newTask.weight
+            ) return newTask;
+        }
+        throw new IllegalStateException("Task not matched.");
+    }
+
+    ActionSequence copy() {
         return new ActionSequence(vehicle, actions);
     }
 
-    @Override
     /**
      * Returns true if the other object is also a ActionSequence and represents
      * essentially the same sequence. This is compared by the total distance
@@ -226,6 +254,7 @@ class ActionSequence {
      * This is important in order to avoid being stuck in local minima with
      * the local stochastic search.
      */
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ActionSequence)) return false;

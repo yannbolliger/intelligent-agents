@@ -152,7 +152,8 @@ public class DummyAuctionAgentRandom implements AuctionBehavior {
 
     @Override
     public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-        return new CentralizedPlanner(agent.vehicles(), timeoutPlan).plan(tasks);
+        return new CentralizedPlanner(agent.vehicles(), timeoutPlan)
+                .plan(tasks, currentAssignment);
     }
 
     private int getEdgeHash(City from, City to) {

@@ -1,5 +1,6 @@
 package bollger;
 
+import logist.plan.Action;
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
@@ -70,7 +71,14 @@ public class Solution {
 
 
     public Solution addTask(Task task) {
-        Map<Vehicle, ActionSequence> newTaskAssignments = new HashMap(assignments);
+        Map<Vehicle, ActionSequence> newTaskAssignments = new HashMap();
+
+        for(Map.Entry<Vehicle, ActionSequence> entry : assignments.entrySet()) {
+            Vehicle vehicle = entry.getKey();
+            ActionSequence sequence = entry.getValue();
+
+            newTaskAssignments.put(vehicle, sequence.copy());
+        }
 
         Vehicle bestVehicle = findBestVehicle(task, vehicles, newTaskAssignments);
 
@@ -79,10 +87,7 @@ public class Solution {
                 assignments.get(bestVehicle).append(task)
         );
 
-        Solution copy = new Solution(newTaskAssignments, vehicles);
-
-
-        return copy;
+        return new Solution(newTaskAssignments, vehicles);
     }
 
     public double getCost() {
@@ -180,6 +185,19 @@ public class Solution {
         }
 
         return estimatedMaxGain;
+    }
+
+    public Solution translateTo(TaskSet tasks) {
+        Map<Vehicle, ActionSequence> newAssignments = new HashMap<>();
+
+        for (Map.Entry<Vehicle, ActionSequence> entry : assignments.entrySet()) {
+            ActionSequence actionSequence = entry.getValue();
+            ActionSequence newSequence = actionSequence.translateTo(tasks);
+
+            newAssignments.put(entry.getKey(), newSequence);
+        }
+
+        return new Solution(newAssignments, vehicles);
     }
 
     @Override

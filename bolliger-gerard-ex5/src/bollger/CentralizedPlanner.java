@@ -31,25 +31,28 @@ public class CentralizedPlanner {
 
 
     public Solution plan(Task task, Solution previousSolution) {
-        Solution initialSolution = previousSolution.addTask(task);
-        return findBestSolution(initialSolution);
+        long timeStart = System.currentTimeMillis();
+
+        return findBestSolution(previousSolution.addTask(task), timeStart);
     }
 
-    public List<Plan> plan(TaskSet tasks) {
-        Solution initialSolution = Solution.initial(vehicles, tasks);
+    public List<Plan> plan(TaskSet tasks, Solution previousSolution) {
+        long timeStart = System.currentTimeMillis();
 
         // we don't have to search for a solution if there are no tasks
-        if (tasks.isEmpty()) return initialSolution.getPlans();
+        if (tasks.isEmpty()) return previousSolution.getPlans();
 
-        Solution bestSolution = findBestSolution(initialSolution);
+        // translate previous solution to new task set
+        Solution initialSolution = previousSolution.translateTo(tasks);
+
+        Solution bestSolution = findBestSolution(initialSolution, timeStart);
 
         List<Plan> plans = bestSolution.getPlans();
         System.out.println("Total cost is " + bestSolution.getCost());
         return plans;
     }
 
-    private Solution findBestSolution(Solution initialSolution) {
-        long timeStart = System.currentTimeMillis();
+    private Solution findBestSolution(Solution initialSolution, long timeStart) {
 
         Solution nextSolution = initialSolution;
         Solution bestSolution = nextSolution;
