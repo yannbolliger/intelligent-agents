@@ -35,7 +35,7 @@ public class Solution {
             taskAssignments.put(vehicle, new ActionSequence(vehicle));
         }
 
-        for (Task task : tasks){
+        for (Task task : tasks) {
 
             Vehicle bestVehicle = findBestVehicle(task, vehicles, taskAssignments);
 
@@ -84,7 +84,7 @@ public class Solution {
 
         newTaskAssignments.put(
                 bestVehicle,
-                assignments.get(bestVehicle).append(task)
+                newTaskAssignments.get(bestVehicle).append(task)
         );
 
         return new Solution(newTaskAssignments, vehicles);

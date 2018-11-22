@@ -218,7 +218,6 @@ class ActionSequence {
 
         for (TaskAction action : this.actions) {
             Task newTask = findNewTask(tasks, action.getTask());
-            tasks.remove(newTask);
 
             if (action.isPickup()) {
                 newSeq.actions.add(new PickupAction(newTask));
