@@ -224,6 +224,7 @@ class ActionSequence {
             }
             else {
                 newSeq.actions.add(new DeliveryAction(newTask));
+                tasks.remove(newTask);
             }
         }
         return newSeq;
@@ -233,7 +234,8 @@ class ActionSequence {
         for (Task newTask : tasks) {
             if (newTask.deliveryCity.equals(task.deliveryCity) &&
                     newTask.pickupCity.equals(task.pickupCity) &&
-                    newTask.weight == newTask.weight
+                    newTask.weight == task.weight &&
+                    newTask.id == task.id
             ) return newTask;
         }
         throw new IllegalStateException("Task not matched.");
