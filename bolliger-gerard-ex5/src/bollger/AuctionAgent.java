@@ -27,6 +27,7 @@ public class AuctionAgent implements AuctionBehavior {
     private static final int LOSS_ROUNDS = 6;
     private static final int ROUNDS_TO_PROFIT = 10;
     private static final long BID_DELTA = 200;
+    private static final double DISCOUNT_FACTOR = 0.3;
 
     private long timeoutSetup;
     private long timeoutPlan;
@@ -158,7 +159,7 @@ public class AuctionAgent implements AuctionBehavior {
         if (round + numberWonTasks < LOSS_ROUNDS) {
             return Math.max(
                     minimumPathCost(task),
-                    marginalCost - marginalEstimatedMaxGain * 0.1
+                    marginalCost - marginalEstimatedMaxGain * DISCOUNT_FACTOR
             );
         }
 
@@ -173,7 +174,7 @@ public class AuctionAgent implements AuctionBehavior {
         // Phase 3 bidding
         return Math.max(
                 minimumPathCost(task),
-                marginalCost + 1
+                marginalCost + Math.max(1, 1 - marginalEstimatedMaxGain * DISCOUNT_FACTOR)
         );
     }
 
