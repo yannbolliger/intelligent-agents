@@ -154,20 +154,25 @@ public class AuctionAgent implements AuctionBehavior {
 
         System.out.println("marginalCost " + marginalCost);
 
+        // Phase 1 bidding
         if (round + numberWonTasks < LOSS_ROUNDS) {
             return Math.max(
-                    minimumPathCost(task, false),
+                    minimumPathCost(task),
                     marginalCost - marginalEstimatedMaxGain * 0.1
             );
         }
+
+        // Phase 2 bidding
         else if (gains < 0) {
             return Math.max(
-                    minimumPathCost(task, false),
+                    minimumPathCost(task),
                     marginalCost + -gains/Math.max(1, ROUNDS_TO_PROFIT - round)
             );
         }
+
+        // Phase 3 bidding
         return Math.max(
-                0.75 * minimumPathCost(task, true),
+                minimumPathCost(task),
                 marginalCost + 1
         );
     }
@@ -177,7 +182,7 @@ public class AuctionAgent implements AuctionBehavior {
 		return new CentralizedPlanner(agent.vehicles(), timeoutPlan).plan(tasks);
 	}
 
-	private double minimumPathCost(Task task, Boolean fullCapacity) {
+	private double minimumPathCost(Task task) {
 		double minCost = Double.POSITIVE_INFINITY;
 		Vehicle cheapestVehicle = null;
 
@@ -187,10 +192,9 @@ public class AuctionAgent implements AuctionBehavior {
 				cheapestVehicle = v;
 			}
 		}
-		double pathCost = task.pathLength() * cheapestVehicle.costPerKm();
 
-		if (fullCapacity) return pathCost;
-		else return pathCost * task.weight / cheapestVehicle.capacity();
+		double pathCost = task.pathLength() * cheapestVehicle.costPerKm();
+        return pathCost * task.weight / cheapestVehicle.capacity();
 	}
 
 	private int getEdgeHash(City from, City to) {
