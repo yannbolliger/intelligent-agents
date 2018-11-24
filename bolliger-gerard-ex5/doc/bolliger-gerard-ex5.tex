@@ -1,39 +1,187 @@
 \documentclass[11pt]{article}
 
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{textcomp}
+\usepackage{bbm}
+\usepackage{graphicx}
+\graphicspath{ {./} }
+\usepackage{wrapfig}
 \usepackage[top=0.8in, bottom=0.8in, left=0.8in, right=0.8in]{geometry}
-% add other packages here
+% Add other packages here 
 
-% put your group number and names in the author field
+
+% Put your group number and names in the author field %
 \title{\bf Exercise 5: An Auctioning Agent for the Pickup and Delivery Problem}
-\author{Group \textnumero: Student 1, Student 2}
+\author{Group \textnumero : 90  Kyle Gerard, Yann Bolliger}
+
 
 \begin{document}
 \maketitle
 
 \section{Bidding strategy}
-% describe in details your bidding strategy. Also, focus on answering the following questions:
-% - do you consider the probability distribution of the tasks in defining your strategy? How do you speculate about the future tasks that might be auctions?
-% - how do you use the feedback from the previous auctions to derive information about the other competitors?
-% - how do you combine all the information from the probability distribution of the tasks, the history and the planner to compute bids?
+
+% Do you consider the probability distribution of the tasks in defining your
+% strategy? How do you speculate about the future tasks that might be auctions?
+% 
+% How do you use the feedback from the previous auctions to derive information
+% about the other competitors? 
+% 
+% How do you combine all the information from the probability distribution of the
+% tasks, the history and the planner to compute bids?
+
+\subsection{General strategy} 
+
+For the auction agent we implemented a bidding strategy on top of our stochastic
+local search solution from the last assignment. We tweaked the search's
+parameters in order to have faster convergence but otherwise the algorithm
+remains unchanged. The bidding strategy we opted for follows a simple,
+aggressive but powerful concept: 
+
+\begin{quotation}
+Take the first tasks at deficital prices and subsequently enjoy lower marginal 
+costs!
+\end{quotation}
+
+All our design choices rely on this idea. If the vehicle already travels to
+cities on the map then -- assuming dense enough maps, like the ones we were
+given -- it is likely that part of a new parcel's journey is already on the
+vehicles path. If this is the case then this part of the parcel's delivery is
+already paid for and we can offer it at a lower price than the cost.
+
+At each bidding round we compute two values that we will discuss in the
+following subsection. Combined with some bookkeeping about won tasks and gains,
+we calculate the final bid. This calculation is different depending three phases 
+the agent can be in.
+
+
+\subsection{Marginal cost and expected gains}
+
+Upon receiving a task to bid for, we let the planner schedule a plan based on 
+the solution of the last iteration but with the additional task that is offered. 
+The cost of this new schedule minus the cost of the previous one yields the 
+marginal cost. This is the cost that our schedule incurs from delivering the 
+additional task. However, this does not take into account the possibility of 
+future tasks. If for example the next auctioned task has the same route as 
+the current one, then -- provided enough capacity -- we could deliver the next 
+task for free.
+
+To account for future tasks we introduce the \textbf{expected maximum gain}
+$\mathbb{E}[maxGain]$ of a schedule. It measures how much more gains could be
+made if all our vehicles $v \in \mathcal{V}$ were full at each move $m \in
+\mathcal{M}$.
+\begin{eqnarray*}
+\mathbb{E}[maxGain] &=& 
+\sum_{v \in \mathcal{V}} 
+\sum_{m \in \mathcal{M}}
+length(m) \cdot cost(v) \cdot 
+loadFactor\cdot
+\mathbb{E}[remainingTasks]
+\\
+loadFactor &=& \max\left(0, \min\left( 
+\frac{\mathbb{E}[load(v, m)] - load(v, m)}{capacity(v)},
+1 \right)\right)
+\\
+\mathbb{E}[load(v, m)] &=& 
+\sum_{c_p \in \mathcal{C}} \sum_{c_d \in \mathcal{C}}
+\mathbb{P}(task(c_p \rightarrow c_d)) 
+\cdot \mathbb{E}[weight(c_p, c_d)] \cdot
+\mathbbm{1}\{task(c_p \rightarrow c_d) \text{ contains } m\} 
+\end{eqnarray*}
+
+Where $load(v, m)$ is the current load of vehicle $v$ when performing move $m$.
+For better understanding, let us look at a toy example. Consider one vehicle
+with $capacity(v) = 2$ and cities $A \leftrightarrow B \leftrightarrow C$. If
+the vehicle is initially at $A$ and already delivers a task of weight 1 from $B
+\rightarrow C$ then it could still take tasks with weight 2 from $A \rightarrow
+B$ and weight 1 from $B \rightarrow C$. But this is only true if there are
+future auctions where such tasks might appear. This is captured by
+$\mathbb{E}[load(v, m)]$ which takes into account the probability distribution
+of tasks and their expected weights from \texttt{TaskDistribution} as well as
+the guessed $\mathbb{E}[remainingTasks]$. The guess is a simple decreasing
+$\log$ function based on the assumption that there will usually be between 10
+and 60 tasks in total.
+
+As with the marignal cost it is now possible to calculate the marginal expected
+gain at each round by subtracting the previous expected gain. If this quantity
+is large it indicates that taking the offered task will augment our
+possibilities of making profit in the future. If on the other hand it is small
+or even negative it shows us that auctioned task does not bring us any benefit
+in future auctions and it is therefore less valuable to us. In that sense the
+marginal expected gain can be seen as a \textit{utility function} that estimates
+how a task will change our chances of profit in the future.
+
+\subsection{Bidding phases}
+
+With those computations in place we calculate our bids based on three states. 
+In all of them we put a lower bound $l$ on the bids that is some fraction of the 
+path's cost. This is a price that nobody can beat but it prevents the agent from 
+bidding 0 when the marginal cost is 0.
+
+\begin{itemize}
+  
+  \item
+  
+  \textbf{Phase 1}: At the beginning we want to take all the tasks. Therefore we
+  bid at deficital prices. The amount of deficit we make depends on how much
+  utility the task will bring us in the future. We lower the bid for high
+  utilities ($\alpha$ was determined experimentally and set to 0.1): 
+  $$ 
+  bid = \max(l, marginalCost - marginalExpectedGain \cdot \alpha) 
+  $$
+  
+  \item 
+   
+  \textbf{Phase 2}: Once the number of won tasks plus the number of auctioned
+  tasks is larger than 6, we go into the second phase. This phase aims to catch
+  up the deficits that were made in phase 1. The idea is to always be profitable
+  after 10 rounds. Therefore the bids in this phase take into account the 
+  current deficit $d$ of the agent:
+  $$
+  bid = \max(l, marginalCost + d/\max(1, 10 - round))
+  $$
+  
+  \item 
+   
+  \textbf{Phase 3}: When the agent is profitable again it transitions to the
+  last phase. Similarly as in phase 1, the bids are determined by the utility of
+  the offered task but unlike before they are never deficital.
+  ($\beta$ was determined experimentally and set to 0.2):
+  $$ 
+  bid = \max(l, marginalCost + \max(1, 1 - marginalExpectedGain \cdot \beta) 
+  $$
+  
+  
+\end{itemize}
+
 
 \section{Results}
-% in this section, you describe several results from the experiments with your auctioning agent
 
-\subsection{Experiment 1: Comparisons with dummy agents}
-% in this experiment you observe how the results depends on the number of tasks auctioned. You compare with some dummy agents and potentially several versions of your agent (with different internal parameter values). 
+% in this section, you describe several results from the experiments with your
+% auctioning agent
+
+\subsection{Experiment 1: Comparisons with dummy agents} 
+ 
+% in this experiment you observe how the results depends on the number of tasks
+% auctioned. You compare with some dummy agents and potentially several versions
+% of your agent (with different internal parameter values). 
 
 \subsubsection{Setting}
-% you describe how you perform the experiment, the environment and description of the agents you compare with
 
-\subsubsection{Observations}
-% you describe the experimental results and the conclusions you inferred from these results
+%  You describe how you perform the experiment, the environment and description of
+%  the agents you compare with
+
+
+\subsubsection{Observations} 
+
+% you describe the experimental results and the conclusions you inferred from
+% these results
 
 \vdots
 
-\subsection{Experiment n}
-% other experiments you would like to present (for example, varying the internal parameter values)
+\subsection{Experiment n} 
+% Other experiments you would like to present (for example, varying the internal
+% parameter values)
 
 \subsubsection{Setting}
 
