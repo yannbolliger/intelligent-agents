@@ -168,30 +168,69 @@
 
   \subsubsection{Setting}
 
-  %  You describe how you perform the experiment, the environment and description of
-  %  the agents you compare with
-  We use the default config file 'auction.xml' with 60 tasks and run two auctions ( 5 second bid time, 15 second plan time) . In the first auction, our agent competes against our 'dummy' agent which always bids: $marginal cost + 1$.
-  In the second auction, our agent competes against our 'random dummy' agent which always bids: $marginalCost * (Math.random() * 0.5 + 1)$. For all 3 agents, the marginal cost is calculated using the same stochastic local search algorithm.
+  % You describe how you perform the experiment, the environment and description
+  % of the agents you compare with
+  
+  We use the default configuration file \texttt{auction.xml} with 60 tasks and
+  run two auctions (5 seconds bid time, 15 seconds plan time). In the first
+  auction, our agent competes against our ``dummy'' agent which always bids:
+  $marginalCost + 1$. In the second auction, our agent competes against our
+  ``random dummy'' agent which always bids: $marginalCost \cdot
+  (\mathtt{Math.random()} \cdot 0.5 + 1)$. For all three agents, the marginal
+  cost is calculated using the same stochastic local search algorithm.
 
   \subsubsection{Observations}
 
   % you describe the experimental results and the conclusions you inferred from
   % these results
 
-  \includegraphics[width=0.55\textwidth]{dummy.png}
+  \begin{figure}[htbp] 
+	\centering
+	\includegraphics[width=0.55\textwidth]{dummy.png}
+	\label{fig1}
+  \end{figure}
 
-  In the above plot we observe that our agent wins the auction against both dummy agents at the end of the 60 tasks. However, as the first tasks are taken at loss and the random dummy agent is lucky on task 10 and gains 500 profit, our agent would had lost if there had been less than 23 tasks. Out of the numerous runs we did against the random agent, our agent almost always won the auction after 10-13 tasks. Moreover, we know that all auctions will have at least 10 tasks and that random agents can get lucky against any algorithm so we decided that winning most of the time was good enough.
 
-  \subsection{Experiment 2: Varying the discount factor $\alpha$ in phase 1 of our strategy}
+  In the plot \ref{fig1} we observe that our agent wins the auction against both dummy
+  agents at the end of the 60 tasks. However, because the first tasks are taken
+  at loss and because the ``random dummy'' agent is lucky on task 10 and gains
+  500 profit, our agent would have lost had there been less than 23 tasks. Out
+  of the numerous runs we did against the random agent, our agent almost always
+  won the auction after 10-13 tasks. Moreover, we know that all auctions will
+  have at least 10 tasks and that random agents can get lucky against any
+  algorithm so we decided that winning most of the time was sufficient.
+
+  \subsection{Experiment 2: Varying the discount factor $\alpha$ in phase 1 of
+  our strategy}
+  
   % Other experiments you would like to present (for example, varying the internal
   % parameter values)
 
   \subsubsection{Setting}
-  We use the default config file 'auction.xml' with 30 auctioned tasks ( 5 second bid time, 15 second plan time) and ran multiple auctions while varying the discount factor $\alpha$ in phase 1 of our strategy. Our agent competes against our 'dummy' agent which always bids: $marginal cost + 1$.
+  
+  We used the default configuration file \texttt{auction.xml} with 30 auctioned
+  tasks (5 seconds bid time, 15 seconds plan time) and ran multiple auctions
+  while varying the discount factor $\alpha$ in phase 1 of our bidding strategy.
+  Our agent competed against our ``dummy'' agent which always bids:
+  $marginalCost + 1$.
 
   \subsubsection{Observations}
 
-  \includegraphics[width=0.55\textwidth]{discount.png}
+\begin{figure}[htbp] 
+	\centering
+	\includegraphics[width=0.55\textwidth]{discount.png}
+	\label{fig2}
+\end{figure}
+  
 
-  In the above plot we see how our agent's losses increase during phase 1 of our strategy as a function of the  discount factor $\alpha$. We remark that up to the discount factor of $\alpha = 0.8$ our agent is able to recover its losses by the 10th task. With a larger $\alpha$ however, we remark that our agents losses most of its bids because it bids too high to try to regain its high losses. Our conclusion from this experiment is that our strategy is functional with  $\alpha <= 0.8$. Indeed, whatever losses we incur in phase 1 of our strategy, we are later able to regain because of lower marginal costs due to having a lot more tasks than our opponent.
+  In the plot \ref{fig2} we see how our agent's losses increase during phase 1 of our
+  strategy as a function of the discount factor $\alpha$. We remark that up to
+  the discount factor of $\alpha = 0.8$ our agent is able to recover its losses
+  by the 10th task. With a larger $\alpha$ however, we see that the agent looses
+  most of its bids because they are too high, trying to regain its high losses
+  from before. Our conclusion from this experiment is that our strategy is
+  functional with $\alpha \leq 0.8$. Indeed, whatever losses we incur in phase 1
+  of our strategy, we are later able to regain them because of lower marginal
+  costs due to having a lot more tasks than our opponent.
+
 \end{document}
