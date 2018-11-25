@@ -8,15 +8,5 @@
 		<set class-path="bin/"/>
 		<set class-name="bollger.AuctionAgent"/>
 	</agent>
-
-    <agent name="auction-dummy">
-        <set class-path="bin/"/>
-        <set class-name="bollger.DummyAuctionAgent"/>
-    </agent>
-
-    <agent name="auction-random">
-        <set class-path="bin/"/>
-        <set class-name="bollger.DummyAuctionAgentRandom"/>
-    </agent>
 	
 </agents>

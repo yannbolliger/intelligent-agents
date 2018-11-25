@@ -112,7 +112,6 @@ public class AuctionAgent implements AuctionBehavior {
 
 	    // do bookkeeping if task was won
 	    if (winner == agent.id()) {
-	        System.out.println("Agent " + agent.id() + " wins.");
 
 	        ++numberWonTasks;
 	        rewardSum += previous.reward;
@@ -126,22 +125,12 @@ public class AuctionAgent implements AuctionBehavior {
         ++round;
         assignmentWithBiddedTask = null;
 
-        System.out.println(
-                "Agent " + agent.id() + " has gains: " + gains
-                + " total rewards " + rewardSum
-        );
 	}
 
 	@Override
 	public Long askPrice(Task task) {
-	    if (agent.id() == 0) {
-	        System.out.println("\n\n============================");
-	        System.out.println("Round " + round);
-	        System.out.println("============================");
-        }
 
 	    Double price = askPriceDouble(task);
-	    System.out.println("Agent " + agent.id() + " bids " + price);
         return price == null ? null : (long) Math.ceil(price);
 	}
 
@@ -154,11 +143,6 @@ public class AuctionAgent implements AuctionBehavior {
         double marginalEstimatedMaxGain =
                 assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round)
 				- currentEstimatedMaxGain;
-
-        System.out.println("marginalCost " + marginalCost);
-        System.out.println("estimatedMaxGain of new task" + assignmentWithBiddedTask.estimatedMaxGain(expectedLoadOnEdge, round));
-        System.out.println("currentEstimatedMaxGain " + currentEstimatedMaxGain);
-        System.out.println("marginalEstimatedMaxGain " + marginalEstimatedMaxGain);
 
         // Phase 1 bidding
         if (round + numberWonTasks < LOSS_ROUNDS) {
