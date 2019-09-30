@@ -1,0 +1,9 @@
+.idea
+*bin
+*.aux
+*.bbl
+*.blg
+*.log
+*.synctex.gz
+bolliger-gerard-ex1.jar
+history.xml
